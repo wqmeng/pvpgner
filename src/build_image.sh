@@ -1,5 +1,5 @@
 #!/bin/sh
-# wget -O - http://10.0.0.10/docker/pvpgn/build_image.sh | sh -s 1.13c
+# wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/build_image.sh | sh -s 1.13c
 GAMENAME=diablo2
 GAMESHORT=d2
 VERSION=$1
@@ -32,7 +32,7 @@ rm /home/src/${GAMESHORT}_$VERSION/Dockerfile -rf
 cat >>/home/src/${GAMESHORT}_$VERSION/Dockerfile<<EOF
 FROM dokken/centos-stream-9
 LABEL game.name="$GAMENAME" game.version="$VERSION" image.maintainer="$MAINTAINER" image.description="A Docker container for pvpgn $GAMENAME $VERSION Server for Closed Battle.Net on centos-stream-9"
-RUN wget -O - http://10.0.0.10/docker/pvpgn/build_wine.sh | sh -s $VERSION
+RUN wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/build_wine.sh | sh -s $VERSION
 EOF
 
 #docker build -t centos:pvpgn .
@@ -63,7 +63,7 @@ docker ps
 
 #docker run -dt --name pvpgn4 wqmeng:pvpgn /bin/bash # 启动后台运行
 
-docker run -dt --name pvpgn -p 198.15.136.155:4000:4000 -p 198.15.136.155:6112:6112 -p 198.15.136.155:6112:6112/udp -p 198.15.136.155:6113:6113 -p 198.15.136.155:6114:6114 wqmeng:pvpgn /bin/bash
+docker run -dt --name pvpgn -p $EXTIP:4000:4000 -p $EXTIP:6112:6112 -p $EXTIP:6112:6112/udp -p $EXTIP:6113:6113 -p $EXTIP:6114:6114 wqmeng:pvpgn /bin/bash
 
 docker ps
 
@@ -89,13 +89,13 @@ sed -i '$a "D2_113c"                 "PvPGN 1.13c Realm"            10.88.0.1:61
 # realmname               =       D2CS
 sed -i '/^realmname/c realmname               =       D2_113c' /home/pvpgn/conf/d2cs.conf
 # gameservlist            =       <d2gs-IP>,<another-d2gs-IP>
-sed -i '/^gameservlist/c gameservlist            =       198.15.136.155,198.15.136.156' /home/pvpgn/conf/d2cs.conf
+sed -i '/^gameservlist/c gameservlist            =       $EXTIP,198.15.136.156' /home/pvpgn/conf/d2cs.conf
 # bnetdaddr               =       <bnetd-IP>:6112
-sed -i '/^bnetdaddr/c bnetdaddr               =       198.15.136.155:6112' /home/pvpgn/conf/d2cs.conf
+sed -i '/^bnetdaddr/c bnetdaddr               =       $EXTIP:6112' /home/pvpgn/conf/d2cs.conf
 
 # d2dbs.conf
 # gameservlist            =       <d2gs-IP>,<another-d2gs-IP>
-sed -i '/^gameservlist/c gameservlist            =       198.15.136.155,198.15.136.156' /home/pvpgn/conf/d2dbs.conf
+sed -i '/^gameservlist/c gameservlist            =       $EXTIP,198.15.136.156' /home/pvpgn/conf/d2dbs.conf
 
 wine D2CSConsole.exe >& /dev/null &
 wine D2DBSConsole.exe >& /dev/null &
@@ -105,8 +105,8 @@ cd /home/d2gs
 
 #cat /home/d2gs/d2gs.reg
 
-sed -i '/^"D2CSIP"="192.168.1.1"/c "D2CSIP"="198.15.136.155"' /home/d2gs/d2gs.reg
-sed -i '/^"D2DBSIP"="192.168.1.1"/c "D2DBSIP"="198.15.136.155"' /home/d2gs/d2gs.reg
+sed -i '/^"D2CSIP"="192.168.1.1"/c "D2CSIP"="$EXTIP"' /home/d2gs/d2gs.reg
+sed -i '/^"D2DBSIP"="192.168.1.1"/c "D2DBSIP"="$EXTIP"' /home/d2gs/d2gs.reg
 # [HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\D2Server\D2GS]  // 64bit Win
 # [HKEY_LOCAL_MACHINE\SOFTWARE\D2Server\D2GS] // 32bit Win
 \cp /home/d2gs/d2gs.reg /home/d2gs/d2gs_x64.reg
@@ -137,9 +137,9 @@ tail /home/pvpgn/var/d2dbs.log -n 30
 tail /home/d2gs/d2gs.log -n 30
 
 
-#docker run -p 198.15.136.155:6112:6112 wqmeng:pvpgn pvpgn3
+#docker run -p $EXTIP:6112:6112 wqmeng:pvpgn pvpgn3
 
-#docker container run --expose 6112 -p 198.15.136.155:6112:6112 pvpgn3
+#docker container run --expose 6112 -p $EXTIP:6112:6112 pvpgn3
 
 #  查看容器的端口映射情况，在容器外执行：
 docker port pvpgn3
@@ -165,14 +165,14 @@ docker run wqmeng:pvpgn cd /home/pvpgn
 
 
 # 第一个docker需要启动pvpgn
-#docker run -dt --name pvpgn -p 198.15.136.155:4000:4000 -p 198.15.136.155:6112:6112 -p 198.15.136.155:6112:6112/udp -p 198.15.136.155:6113:6113 -p 198.15.136.155:6114:6114 wqmeng:pvpgn /bin/bash
+#docker run -dt --name pvpgn -p $EXTIP:4000:4000 -p $EXTIP:6112:6112 -p $EXTIP:6112:6112/udp -p $EXTIP:6113:6113 -p $EXTIP:6114:6114 wqmeng:pvpgn /bin/bash
 
 docker stop pvpgn
 docker rm pvpgn
 
 docker ps -a
 
-docker run -dt --name pvpgn -p 198.15.136.155:4000:4000 -p 198.15.136.155:6112:6112 -p 198.15.136.155:6112:6112/udp wqmeng:pvpgn /bin/bash
+docker run -dt --name pvpgn -p $EXTIP:4000:4000 -p $EXTIP:6112:6112 -p $EXTIP:6112:6112/udp wqmeng:pvpgn /bin/bash
 
 docker exec -it pvpgn /bin/bash
 
@@ -180,12 +180,12 @@ docker exec -it pvpgn /bin/bash
 
 docker exec -it pvpgn-gs156 /bin/bash
 
-#docker run -p 198.15.136.155:6112:6112 wqmeng:pvpgn wine /home/pvpgn/PvPGNConsole.exe >& /dev/null &
-#docker run -p 198.15.136.155:6113:6113 wqmeng:pvpgn wine /home/pvpgn/D2CSConsole.exe >& /dev/null &
-#docker run -p 198.15.136.155:6114:6114 wqmeng:pvpgn wine /home/pvpgn/D2DBSConsole.exe >& /dev/null &
+#docker run -p $EXTIP:6112:6112 wqmeng:pvpgn wine /home/pvpgn/PvPGNConsole.exe >& /dev/null &
+#docker run -p $EXTIP:6113:6113 wqmeng:pvpgn wine /home/pvpgn/D2CSConsole.exe >& /dev/null &
+#docker run -p $EXTIP:6114:6114 wqmeng:pvpgn wine /home/pvpgn/D2DBSConsole.exe >& /dev/null &
 
 #docker container run --expose [容器端口] -p [宿主机端口]:[容器端口] [容器 ID 或名称]
-#docker container run --expose 6112 -p 198.15.136.155:6112:6112 pvpgn3
+#docker container run --expose 6112 -p $EXTIP:6112:6112 pvpgn3
 
 firewall-cmd --permanent --zone=public --add-port=6112/tcp
 firewall-cmd --permanent --zone=public --add-port=6112/udp
@@ -213,9 +213,9 @@ iptables -t nat -nvL
 
 # Note: D2GS.exe will exit immediately if D2CS or D2DBSDotNet is not running.
 docker run -p $IP:4000:4000 wqmeng:pvpgn wine /home/d2gs/D2GS.exe >& /dev/null &
-docker run -p 198.15.136.155:4000:4000 wqmeng:pvpgn wine /home/d2gs/D2GS.exe >& /dev/null &
+docker run -p $EXTIP:4000:4000 wqmeng:pvpgn wine /home/d2gs/D2GS.exe >& /dev/null &
 
-# 只运行GS的Docker.  和 198.15.136.155 使用一个 cs 
+# 只运行GS的Docker.  和 $EXTIP 使用一个 cs 
 docker run -dt --name pvpgn-gs156 -p 198.15.136.156:4000:4000 wqmeng:pvpgn /bin/bash
 docker exec -it pvpgn-gs156 /bin/bash
 
@@ -224,8 +224,8 @@ cd /home/d2gs
 
 #cat /home/d2gs/d2gs.reg
 
-sed -i '/^"D2CSIP"="/c "D2CSIP"="198.15.136.155"' /home/d2gs/d2gs.reg
-sed -i '/^"D2DBSIP"="/c "D2DBSIP"="198.15.136.155"' /home/d2gs/d2gs.reg
+sed -i '/^"D2CSIP"="/c "D2CSIP"="$EXTIP"' /home/d2gs/d2gs.reg
+sed -i '/^"D2DBSIP"="/c "D2DBSIP"="$EXTIP"' /home/d2gs/d2gs.reg
 # [HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\D2Server\D2GS]  // 64bit Win
 # [HKEY_LOCAL_MACHINE\SOFTWARE\D2Server\D2GS] // 32bit Win
 \cp /home/d2gs/d2gs.reg /home/d2gs/d2gs_x64.reg

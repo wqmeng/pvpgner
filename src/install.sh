@@ -1,6 +1,6 @@
 #!/bin/bash
-# wget -O - http://10.0.0.10/docker/pvpgn/install.sh | sh -s help
-# wget -O - http://10.0.0.10/docker/pvpgn/install.sh | sh <(cat) </dev/tty
+# wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/install.sh | sh -s help
+# wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/install.sh | sh <(cat) </dev/tty
 
 Color_Text()
 {
@@ -346,9 +346,9 @@ Print_Sucess_Info()
     echo "+------------------------------------------------------------------------+"
     echo "|        Pvpgn Closed Realm installer on docker Written by wqmeng        |"
     echo "+------------------------------------------------------------------------+"
-    echo "|         For more information please visit http://www.lnmp.org          |"
+    echo "|  For more information please visit https://github.com/wqmeng/pvpgner   |"
     echo "+------------------------------------------------------------------------+"
-    echo "|    pvpgn status manage: pvpgn {start|stop|reload|restart|kill|status}    |"
+    echo "|   pvpgn status manage: pvpgn {start|stop|reload|restart|kill|status}   |"
     echo "+------------------------------------------------------------------------+"
     echo "|  pvpgn:                                                                |"
     echo "|         ${EXTIP}                                                       |"
@@ -360,9 +360,9 @@ Print_Sucess_Info()
     echo "|  Add realm: pvpgn realm add                                            |"
     echo "|  Add d2gs: pvpgn d2gs add                                              |"
     echo "+------------------------------------------------------------------------+"
-    echo "|  Default directory: ${Default_Website_Dir}                              |"
+    echo "|  Default directory: /home/pvpgn                                        |"
     echo "+------------------------------------------------------------------------+"
-    echo "|  MySQL/MariaDB root password: ${DB_Root_Password}                          |"
+    echo "|  MySQL/MariaDB root password: ${DB_Root_Password}                      |"
     echo "+------------------------------------------------------------------------+"
     pvngn status
     netstat -ntl
@@ -393,7 +393,7 @@ echo "|        Pvpgn Closed Realm installer on docker Written by wqmeng        |
 echo "+------------------------------------------------------------------------+"
 echo "|      A tool to auto-compile & install pvpgn closed realm on Linux      |"
 echo "+------------------------------------------------------------------------+"
-echo "|          For more information please visit http://www.lnmp.org         |"
+echo "|   For more information please visit https://github.com/wqmeng/pvpgner  |"
 echo "+------------------------------------------------------------------------+"
 
 # If we have a argument, then we do not select.
@@ -439,7 +439,7 @@ case "${ACT}" in
     pvpgn)
         # Dispaly_Selection
         echo "Pvpgn install is starting ..."
-        wget -qO - http://10.0.0.10/docker/pvpgn/build_docker.sh | sh
+        wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/build_docker.sh | sh
 
         docker ps
         docker stop pvpgn
@@ -455,7 +455,7 @@ case "${ACT}" in
         # 登录容器修改配置
         # Start pvpgn
         docker exec -it pvpgn rm -rf /home/pvpgn/config_pvpgn.sh
-        docker exec -it pvpgn wget -q http://10.0.0.10/docker/pvpgn/config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
+        docker exec -it pvpgn wget -q https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn chmod +x /home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup $EXTIP $REALM_NAME 6113 $D2Select
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh start
@@ -466,12 +466,26 @@ case "${ACT}" in
         # docker exec -it pvpgn tmux new -s pvpgn /home/pvpgn/config_pvpgn.sh start
 
         # LNMP_Stack 2>&1 | tee /root/pvpgn-install.log
+
+        firewall-cmd --permanent --zone=public --add-port=6112/tcp
+        firewall-cmd --permanent --zone=public --add-port=6112/udp
+        firewall-cmd --permanent --zone=public --add-port=6113/tcp
+        firewall-cmd --permanent --zone=public --add-port=6114/tcp
+
+        firewall-cmd --permanent --zone=public --add-port=4000/tcp
+
+        firewall-cmd --reload
+        # firewall-cmd --query-port=6112/tcp
+
+        firewall-cmd --list-all
+        # firewall-cmd --list-all-zones
+
         ;;
     realm)
         # Dispaly_Selection
         D2Select="2"
 
-        docker run -dt --name pvpgn-$REALM_NAME -p 198.15.136.155:6112:6112 -p 198.15.136.155:6112:6112/udp -p 198.15.136.155:6113:6113 -p 198.15.136.155:4000:4000 wqmeng:pvpgn /bin/bash
+        docker run -dt --name pvpgn-$REALM_NAME -p $EXTIP:6112:6112 -p $EXTIP:6112:6112/udp -p $EXTIP:6113:6113 -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
         # 登录容器修改配置
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh $D2Select
 
