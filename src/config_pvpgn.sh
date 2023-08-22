@@ -257,10 +257,12 @@ Start_d2gs() {
     # wine D2GS.exe >& /dev/null &
     # nohup bash -c "wine D2GS.exe &" </dev/null &>/dev/null &
     echo ${CONF_PATH}
-    wine D2GS.exe
+    # wine D2GS.exe
     # nohup bash -c "wine D2GS.exe >& /dev/null &" </dev/null &>/dev/null &
     # wine D2GS.exe 2>&1 | tee /home/output
     # nohup bash '(wine D2GS.exe) |& tee out.log'
+    nohup bash -c "wine D2GS.exe &" </dev/null &>/dev/null &
+    sleep 1
 }
 
 Add_realm() {

@@ -458,11 +458,11 @@ case "${ACT}" in
         docker exec -it pvpgn wget -q https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn chmod +x /home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup $EXTIP $REALM_NAME 6113 $D2Select
-        docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh start
+        docker exec -it -w /home/pvpgn pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh start
 
         # Start D2GS
-        docker exec -it pvpgn pkill -f 'D2GS'
-        docker exec -d -w /home/d2gs pvpgn wine D2GS.exe # Not sure why D2GS.exe can not start up and running as PvPGNConsole from config_pvpgn.sh start command. 
+        # docker exec -it pvpgn pkill -f 'D2GS'
+        # docker exec -d -w /home/d2gs pvpgn wine D2GS.exe # Not sure why D2GS.exe can not start up and running as PvPGNConsole from config_pvpgn.sh start command. 
         # docker exec -it pvpgn tmux new -s pvpgn /home/pvpgn/config_pvpgn.sh start
 
         # LNMP_Stack 2>&1 | tee /root/pvpgn-install.log
@@ -487,6 +487,7 @@ case "${ACT}" in
 
         # Add realm to pvpgn
         docker run -dt --name pvpgn -p $EXTIP:$REALM_PORT:$REALM_PORT wqmeng:pvpgn /bin/bash
+        
         docker run -dt --name pvpgn-$REALM_NAME -p $EXTIP:$REALM_PORT:$REALM_PORT -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
         # 登录容器修改配置
         # Create a new container, and run d2gs for the new realm.
