@@ -132,7 +132,8 @@ Setup_d2gs() {
     mkdir -p /home/d2gs
     cd /home/d2gs
     wget -q http://10.0.0.10/docker/d2gs/D2GS_Base.7z
-    wget -q http://10.0.0.10/docker/d2gs/D2GS_${VERSION}.7z
+    wget -q https://github.com/wqmeng/pvpgner/raw/main/d2gs/D2GS_${VERSION}.7z
+    
     7za x -y D2GS_Base.7z
     mv D2GS_Base/* .
     rm D2GS_Base -rf

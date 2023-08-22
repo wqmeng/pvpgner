@@ -1,6 +1,6 @@
 #!/bin/sh
 # setup
-# wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/setup.sh | sh
+# wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/setup.sh | sh
 
 if  [ "$1" == "" ]; then
   VERSION=1.13c
@@ -22,6 +22,6 @@ systemctl enable --now podman
 #mkdir -p /home/src
 #cd /home/src
 
-wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/build_image.sh | sh -s ${VERSION}
+wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/build_image.sh | sh -s ${VERSION}
 
-#wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/build_d2_113c.sh | sh
+#wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/build_d2_113c.sh | sh

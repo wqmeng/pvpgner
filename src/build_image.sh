@@ -1,5 +1,5 @@
 #!/bin/sh
-# wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/build_image.sh | sh -s 1.13c
+# wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/build_image.sh | sh -s 1.13c
 GAMENAME=diablo2
 GAMESHORT=d2
 VERSION=$1
@@ -32,7 +32,7 @@ rm /home/src/${GAMESHORT}_$VERSION/Dockerfile -rf
 cat >>/home/src/${GAMESHORT}_$VERSION/Dockerfile<<EOF
 FROM dokken/centos-stream-9
 LABEL game.name="$GAMENAME" game.version="$VERSION" image.maintainer="$MAINTAINER" image.description="A Docker container for pvpgn $GAMENAME $VERSION Server for Closed Battle.Net on centos-stream-9"
-RUN wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/build_wine.sh | sh -s $VERSION
+RUN wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/build_wine.sh | sh -s $VERSION
 EOF
 
 #docker build -t centos:pvpgn .

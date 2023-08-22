@@ -1,6 +1,6 @@
 #!/bin/bash
-# wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/install.sh | sh -s help
-# wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/install.sh | sh <(cat) </dev/tty
+# wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh -s help
+# wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh <(cat) </dev/tty
 
 Color_Text()
 {
@@ -439,7 +439,7 @@ case "${ACT}" in
     pvpgn)
         # Dispaly_Selection
         echo "Pvpgn install is starting ..."
-        wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/build_docker.sh | sh
+        wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/build_docker.sh | sh
 
         docker ps
         docker stop pvpgn
@@ -455,7 +455,7 @@ case "${ACT}" in
         # 登录容器修改配置
         # Start pvpgn
         docker exec -it pvpgn rm -rf /home/pvpgn/config_pvpgn.sh
-        docker exec -it pvpgn wget -q https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/src/config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
+        docker exec -it pvpgn wget -q https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn chmod +x /home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup $EXTIP $REALM_NAME 6113 $D2Select
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh start
