@@ -485,8 +485,11 @@ case "${ACT}" in
         # Dispaly_Selection
         D2Select="2"
 
-        docker run -dt --name pvpgn-$REALM_NAME -p $EXTIP:6112:6112 -p $EXTIP:6112:6112/udp -p $EXTIP:6113:6113 -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
+        # Add realm to pvpgn
+        docker run -dt --name pvpgn -p $EXTIP:$REALM_PORT:$REALM_PORT wqmeng:pvpgn /bin/bash
+        docker run -dt --name pvpgn-$REALM_NAME -p $EXTIP:$REALM_PORT:$REALM_PORT -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
         # 登录容器修改配置
+        # Create a new container, and run d2gs for the new realm.
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh $D2Select
 
         # LNMPA_Stack 2>&1 | tee /root/add-realm.log
