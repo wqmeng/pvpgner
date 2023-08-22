@@ -114,10 +114,10 @@ Setup_address_translation() {
     D2GS_IP_output=$6
 
     sed -i '/^'${D2CS_IP_input}'/d' ${CONF_PATH}/conf/address_translation.conf
-    sed -i '/1.2.3.4:6113/a '${D2CS_IP_input}':'${D2CS_PORT}'   '${D2CS_IP_output}':'${D2CS_PORT}'          10.88.0.0/24         ANY' ${CONF_PATH}/conf/address_translation.conf
+    sed -i '/1.2.3.4:6113/a '${D2CS_IP_input}':'${D2CS_PORT}'   '${D2CS_IP_output}':'${D2CS_PORT}'          10.88.0.0/16         ANY' ${CONF_PATH}/conf/address_translation.conf
 
     # sed -i '/^'${D2GS_IP_input}'/d' ${CONF_PATH}/conf/address_translation.conf
-    sed -i '/1.2.3.4:4000/a '${D2GS_IP_input}':4000   '${D2GS_IP_output}':4000          10.88.0.0/24         ANY' ${CONF_PATH}/conf/address_translation.conf
+    sed -i '/1.2.3.4:4000/a '${D2GS_IP_input}':4000   '${D2GS_IP_output}':4000          10.88.0.0/16         ANY' ${CONF_PATH}/conf/address_translation.conf
     #LOCAL IP ADDRESS:6113    EXTERNAL IP ADDRESS:6113        192.168.1.0/24            ANY
 }
 
@@ -133,7 +133,7 @@ Setup_d2gs() {
     cd /home/d2gs
     wget -q http://10.0.0.10/docker/d2gs/D2GS_Base.7z
     wget -q https://github.com/wqmeng/pvpgner/raw/main/d2gs/D2GS_${VERSION}.7z
-    
+
     7za x -y D2GS_Base.7z
     mv D2GS_Base/* .
     rm D2GS_Base -rf
@@ -470,9 +470,9 @@ echo '------'
 # 5 address_translation.conf
 
 #sed -i '/^'${IP}'/d' /home/pvpgn/conf/address_translation.conf
-#sed -i '/1.2.3.4:6113/a '${IP}':'${D2CS_PORT}'   '${EXTIP}':'${D2CS_PORT}'          10.88.0.0/24         ANY' /home/pvpgn/conf/address_translation.conf
+#sed -i '/1.2.3.4:6113/a '${IP}':'${D2CS_PORT}'   '${EXTIP}':'${D2CS_PORT}'          10.88.0.0/16         ANY' /home/pvpgn/conf/address_translation.conf
 
-#sed -i '/1.2.3.4:4000/a '${IP}':4000   '${EXTIP}':4000          10.88.0.0/24         ANY' /home/pvpgn/conf/address_translation.conf
+#sed -i '/1.2.3.4:4000/a '${IP}':4000   '${EXTIP}':4000          10.88.0.0/16         ANY' /home/pvpgn/conf/address_translation.conf
 #LOCAL IP ADDRESS:6113    EXTERNAL IP ADDRESS:6113        192.168.1.0/24            ANY
 
 #Setup_address_translation '/home/pvpgn' ${BBBB} ${EXTIP} ${D2CS_PORT} ${DDDD} ${EXTIP}
