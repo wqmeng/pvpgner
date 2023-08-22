@@ -519,7 +519,7 @@ case "${ACT}" in
         Start_Pvpgn '/home/pvpgn'
         Start_d2cs '/home/pvpgn'
         Start_d2dbs '/home/pvpgn'
-        Start_d2gs '/home/d2gs'
+        # Start_d2gs '/home/d2gs' 
         # Setup_Pvpgn
         # LNMP_Stack 2>&1 | tee /root/pvpgn-install.log
         ;;
