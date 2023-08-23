@@ -266,29 +266,31 @@ Start_d2gs() {
 }
 
 Add_realm() {
-    if [ "$1" == "" ]; then
-        CONF_PATH=/home/pvpgn_$1
-    else
-        CONF_PATH=$1
-    fi
+    # if [ "$1" == "" ]; then
+    #     CONF_PATH=/home/pvpgn_$1
+    # else
+    #     CONF_PATH=$1
+    # fi
     
-    echo 'Add a new realm'
-    REALM_NAME=$2
+    REALM_NAME=$1
+    echo 'Add a new realm: '${REALM_NAME}
 
     CONF_PATH=/home/pvpgn_${REALM_NAME}
+    rm -rf ${CONF_PATH}
+    mkdir -p ${CONF_PATH}
     \cp -r /home/pvpgn ${CONF_PATH}
 
     cd ${CONF_PATH}
-    NEW_REAL_IP=$3
-    NEW_REALM_PORT=$4
-    BNETD_IP=$5
+    # NEW_REAL_IP=$2
+    REALM_PORT=$2
+    BNETD_IP=$3
 
-    Setup_realm ${CONF_PATH} ${REALM_NAME} '"PvPGN '${REALM_NAME}' Realm"' ${NEW_REAL_IP} ${NEW_REALM_PORT}
+    Setup_realm ${CONF_PATH} ${REALM_NAME} '"PvPGN '${REALM_NAME}' Realm"' ${BBBB} ${REALM_PORT}
     #Setup_bnetd ${CONF_PATH}
-    Setup_d2cs ${CONF_PATH} ${REALM_NAME} ${NEW_REAL_IP} ${NEW_REALM_PORT} ${BNETD_IP}
+    Setup_d2cs ${CONF_PATH} ${REALM_NAME} ${BBBB} ${REALM_PORT} ${BNETD_IP}
 
     # d2gs can not create in the same pvpgn docker container, as it already has one d2gs takes the port 4000.
-    # Setup_d2gs '/home/d2gs' ${NEW_REAL_IP} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0'
+    # Setup_d2gs '/home/d2gs' ${NEW_REALM_IP} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0'
 
     # When we add a new realm, we should create a new gameserver to it.
 
@@ -297,6 +299,7 @@ Add_realm() {
     Start_d2cs ${CONF_PATH}
     Start_d2dbs '/home/pvpgn'
     Start_d2gs '/home/d2gs'
+    sleep 1
 }
 
 Add_d2gs() {
@@ -527,21 +530,23 @@ case "${ACT}" in
         # LNMP_Stack 2>&1 | tee /root/pvpgn-install.log
         ;;
     stop)
-        # Dispaly_Selection
-        D2Select="2"
         pkill -f 'PvPGNConsole'
         pkill -f 'D2CSConsole'
         pkill -f 'D2DBSConsole'
         pkill -f 'D2GS'
-        # docker run -dt --name pvpgn-$REALM_NAME -p 198.15.136.155:6112:6112 -p 198.15.136.155:6112:6112/udp -p 198.15.136.155:6113:6113 -p 198.15.136.155:4000:4000 wqmeng:pvpgn /bin/bash
-        # # 登录容器修改配置
-        # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh $D2Select
-
-        # LNMPA_Stack 2>&1 | tee /root/add-realm.log
         ;;
-    add)
+    realm)
+        # Dispaly_Selection
+        $REALM_NAME = $2
+        $REALM_PORT = $3
+        Add_realm $REALM_NAME $REALM_PORT $AAAA
+        Add_d2gs
+        # LAMP_Stack 2>&1 | tee /root/add-d2gs.log
+        ;;
+    d2gs)
         # Dispaly_Selection
         REALMSelect=$2
+        Add_realm
         # LAMP_Stack 2>&1 | tee /root/add-d2gs.log
         ;;
     delete)

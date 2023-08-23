@@ -262,11 +262,43 @@ Dispaly_Selection()
         fi
         echo "Your Realm name: ${REALM_NAME}"
 
-        REALM_PORT="6113"
-        Echo_Yellow "Please setup Realm port, default is: 6113"
-        read -p "Please enter: " REALM_PORT
-        if [[ "${REALM_PORT}" = "" ]]; then
+        if [ "${ACTSelect}" = "2" ]; then
+        # add realm
+            USEDPORTS=$(netstat -ntl | grep 'tcp' | grep -v 'tcp6' | cut -d ':' -f2 | cut -d ' ' -f1)
+
+            ARRPORTS=(`echo $USEDPORTS | tr ' ' ' '`)
+
+            REALM_PORT=6113
+            
+            while [ $REALM_PORT -le 60000 ]
+            do
+                REALM_PORT=$(expr $REALM_PORT + 100)
+
+                PORTUSED=false
+
+                for i in "${!ARRPORTS[@]}"; do
+                    echo "$i: ${ARRPORTS[i]}"
+                    if [ "$REALM_PORT" = "${ARRPORTS[i]}" ]; then 
+                      PORTUSED=true
+                      break
+                    fi
+                done
+
+                if [ "$PORTUSED" = false ]; then                
+                  break
+                fi
+            done
+
+            # echo $REALM_PORT
+
+        else
             REALM_PORT="6113"
+        fi
+
+        Echo_Yellow "Please setup Realm port, default is: "$REALM_PORT
+        read -p "Please enter: " READ_REALM_PORT
+        if [[ "${READ_REALM_PORT}" != "" ]]; then
+            REALM_PORT=${READ_REALM_PORT}
         fi
         echo "Your Realm port: ${REALM_PORT}"
 
@@ -482,11 +514,10 @@ case "${ACT}" in
 
         ;;
     realm)
-        # Dispaly_Selection
-        D2Select="2"
-
         # Add realm to pvpgn
-        docker run -dt --name pvpgn -p $EXTIP:$REALM_PORT:$REALM_PORT wqmeng:pvpgn /bin/bash
+        # docker run -dt --name pvpgn -p $EXTIP:$REALM_PORT:$REALM_PORT wqmeng:pvpgn /bin/bash
+
+        docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh add realm $REALM_NAME ${REALM_PORT} $D2Select
         
         docker run -dt --name pvpgn-$REALM_NAME -p $EXTIP:$REALM_PORT:$REALM_PORT -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
         # 登录容器修改配置
