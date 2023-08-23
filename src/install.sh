@@ -364,7 +364,37 @@ Dispaly_Selection()
         echo "Your Realm name: ${REALM_NAME}"        
     fi
 
-    EXTIP=$(ip a | grep -v 'inet6' | grep 'inet' | grep -v 'host lo' | cut -d'/' -f1 | grep -o '[0-9].*' | sed -n '1p')
+    if [ "${ACTSelect}" = "1" ]; then
+        EXTIP=$(ip a | grep -v 'inet6' | grep 'inet' | grep -v 'host lo' | cut -d'/' -f1 | grep -o '[0-9].*' | grep -v '10.88' | sed -n '1p')
+    else 
+        ALL_EXTIPS=$(ip a | grep -v 'inet6' | grep 'inet' | grep -v 'host lo' | cut -d'/' -f1 | grep -o '[0-9].*' | grep -v '10.88')
+        ALL_USEDIPS=$(netstat -ntl | grep 'tcp' | grep -v 'tcp6' | grep '4000' | cut -d ':' -f1 | tr -s ' ' | cut -d ' ' -f4)
+
+        ARR_ALL_EXTIPS=(`echo $ALL_EXTIPS | tr ' ' ' '`)
+        ARR_ALL_USEDIPS=(`echo $ALL_USEDIPS | tr ' ' ' '`)
+
+        for i in "${!ARR_ALL_EXTIPS[@]}"; do
+            echo "i: $i: ${ARR_ALL_EXTIPS[i]}"
+            IPUSED=false
+            for j in "${!ARR_ALL_USEDIPS[@]}"; do
+                echo "j: $j: ${ARR_ALL_USEDIPS[j]}"
+                if [ "${ARR_ALL_EXTIPS[i]}" = "${ARR_ALL_USEDIPS[j]}" ]; then 
+                    IPUSED=true
+                    break
+                fi
+            done
+
+            if [ "${IPUSED}" = false ]; then
+                EXTIP=${ARR_ALL_EXTIPS[i]}
+                break
+            fi
+        done
+
+        # echo $EXTIP
+
+        # ARR_ALL_USEDIPS=(`echo $ALL_USEDIPS | tr ' ' ' '`)
+
+    fi
 
     # 
     # str="ONE,TWO,THREE,FOUR"
@@ -526,9 +556,9 @@ case "${ACT}" in
         # Add realm to pvpgn
         # docker run -dt --name pvpgn -p $EXTIP:$REALM_PORT:$REALM_PORT wqmeng:pvpgn /bin/bash
 
-        docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh add realm $REALM_NAME ${REALM_PORT} $D2Select
+        docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh realm $REALM_NAME ${REALM_PORT} $D2Select $EXTIP
         
-        docker run -dt --name pvpgn-$REALM_NAME -p $EXTIP:$REALM_PORT:$REALM_PORT -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
+        # docker run -dt --name pvpgn-$REALM_NAME -p $EXTIP:$REALM_PORT:$REALM_PORT -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
         # 登录容器修改配置
         # Create a new container, and run d2gs for the new realm.
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh $D2Select

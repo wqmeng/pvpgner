@@ -303,7 +303,7 @@ Add_realm() {
 }
 
 Add_d2gs() {
-    $REALM_NAME=$1
+    REALM_NAME=$1
     # d2cs ip
     BBBB=$2
     # d2dbs ip
@@ -537,16 +537,20 @@ case "${ACT}" in
         ;;
     realm)
         # Dispaly_Selection
-        $REALM_NAME = $2
-        $REALM_PORT = $3
+        REALM_NAME=$2
+        REALM_PORT=$3
+        VERSION=$4
+        EXTIP=$5
+        echo 'realm '$REALM_NAME' '$REALM_PORT' '$AAAA
         Add_realm $REALM_NAME $REALM_PORT $AAAA
-        Add_d2gs
+        Add_d2gs $REALM_NAME $BBBB $CCCC $DDDD $EXTIP
         # LAMP_Stack 2>&1 | tee /root/add-d2gs.log
         ;;
     d2gs)
         # Dispaly_Selection
-        REALMSelect=$2
-        Add_realm
+        REALM_NAME=$2
+        # Add_realm
+        Add_d2gs $REALM_NAME $BBBB $CCCC $DDDD $EXTIP
         # LAMP_Stack 2>&1 | tee /root/add-d2gs.log
         ;;
     delete)
