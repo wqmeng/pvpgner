@@ -1,7 +1,7 @@
 #!/bin/bash
 # wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh -s help
 # wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh <(cat) </dev/tty
-# tmux new-session -ds pvpgn; tmux send-keys -t pvpgn 'wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh <(cat) </dev/tty' ENTER; tmux a -t pvpgn;
+# dnf -y install tmux; tmux new-session -ds pvpgn; tmux send-keys -t pvpgn 'wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh <(cat) </dev/tty' ENTER; tmux a -t pvpgn;
 
 Color_Text()
 {
@@ -451,7 +451,9 @@ Print_Sucess_Info()
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
-dnf -y install shyaml tmux
+dnf -qy install shyaml tmux podman
+dnf -qy install --assumeyes epel-release
+dnf -qy install --assumeyes p7zip
 
 # Check if user is root
 if [ $(id -u) != "0" ]; then
