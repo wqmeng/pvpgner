@@ -61,7 +61,7 @@ Setup_d2cs() {
     #sed -i '/^gameservlist/c gameservlist            =       198.15.136.155,198.15.136.156' ${CONF_PATH}/conf/d2cs.conf
     D2GSIPS=$(sed -n '/^gameservlist/p' ${CONF_PATH}/conf/d2cs.conf | grep -Po '=\s*.*' | grep -Po '(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9]).*')
 
-    if [ ${D2GSIPS} != "" ]; then
+    if [ "${D2GSIPS}" != "" ]; then
         D2GS_IP=${D2GSIPS}','${D2GS_IP}
     fi
 
@@ -93,7 +93,7 @@ Setup_d2dbs() {
 
     D2GSIPS=$(sed -n '/^gameservlist/p' ${CONF_PATH}/conf/d2dbs.conf | grep -Po '=\s*.*' | grep -Po '(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9]).*')
 
-    if [ ${D2GSIPS} != "" ]; then
+    if [ "${D2GSIPS}" != "" ]; then
         D2GS_IP=${D2GSIPS}','${D2GS_IP}
     fi
 
@@ -132,16 +132,19 @@ Setup_d2gs() {
     mkdir -p /home/d2gs
     cd /home/d2gs    
     # wget -q http://10.0.0.10/docker/d2gs/D2GS_Base.7z
-    wget -q https://ia801809.us.archive.org/29/items/d2gs-base.-7z/D2GS_Base.7z
+    # wget -q https://ia801809.us.archive.org/29/items/d2gs-base.-7z/D2GS_Base.7z
     wget -q https://github.com/wqmeng/pvpgner/raw/main/d2gs/D2GS_${VERSION}.7z
 
-    7za x -y D2GS_Base.7z
-    mv D2GS_Base/* .
-    rm D2GS_Base -rf
-    rm D2GS_Base.7z -rf
+    # create all files soft link in lnsrc to lntest .
+    # ln -s -t ./lntest ./lnsrc/*
+    # 7za x -y D2GS_Base.7z
+    # mv D2GS_Base/* .
+    # rm D2GS_Base -rf
+    # rm D2GS_Base.7z -rf
     7za x -y D2GS_${VERSION}.7z
     mv D2GS_${VERSION}/* .
     rm D2GS_${VERSION} -rf
+    ln -s -t /home/d2gs/ /home/d2gs_base/*
     touch d2_${VERSION}
 
     D2CS_IP=$2
@@ -278,7 +281,7 @@ Add_realm() {
     CONF_PATH=/home/pvpgn_${REALM_NAME}
     rm -rf ${CONF_PATH}
     mkdir -p ${CONF_PATH}
-    \cp -r /home/pvpgn ${CONF_PATH}
+    \cp -r /home/pvpgn/* ${CONF_PATH}
 
     cd ${CONF_PATH}
     # NEW_REAL_IP=$2
@@ -287,7 +290,8 @@ Add_realm() {
 
     Setup_realm ${CONF_PATH} ${REALM_NAME} '"PvPGN '${REALM_NAME}' Realm"' ${BBBB} ${REALM_PORT}
     #Setup_bnetd ${CONF_PATH}
-    Setup_d2cs ${CONF_PATH} ${REALM_NAME} ${BBBB} ${REALM_PORT} ${BNETD_IP}
+    # Setup_d2cs ${CONF_PATH} ${REALM_NAME} ${BBBB} ${REALM_PORT} ${BNETD_IP}
+    # Setup_d2dbs '/home/pvpgn' ${DDDD}
 
     # d2gs can not create in the same pvpgn docker container, as it already has one d2gs takes the port 4000.
     # Setup_d2gs '/home/d2gs' ${NEW_REALM_IP} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0'
@@ -313,10 +317,7 @@ Add_d2gs() {
     # d2gs output
     EXTIP=$5
 
-    Setup_d2cs '/home/pvpgn' $REALM_NAME ${DDDD} ${D2CS_PORT} ${AAAA}
     Setup_d2gs '/home/d2gs' ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0'
-    Setup_d2dbs '/home/pvpgn' ${DDDD}
-
     # address translation should be correct on the pvpgn container, not here?
     # Setup_address_translation '/home/pvpgn' ${BBBB} ${EXTIP} ${D2CS_PORT} ${DDDD} ${EXTIP}
 }
@@ -358,17 +359,19 @@ cd /home/pvpgn
 ACT=$1
 IP=$(ip a | grep -v 'inet6' | grep 'inet' | grep -v 'host lo' | cut -d'/' -f1 | grep -o '[0-9].*')
 
-EXTIP=$2
+TASK=$2
+
+EXTIP=$3
 #
 AAAA=${IP} # pvpgn binding at 6112,  one pvpgn can serve different d2cs.
 BBBB=${IP}    # d2cs  binding at 6113 different version of d2 could use different port to serve. Such as 1.09 use  6109, 
-REALM_NAME=$3
-D2CS_PORT=$4    # d2cs  binding at 6113 different version of d2 could use different port to serve. 
+REALM_NAME=$4
+D2CS_PORT=$5    # d2cs  binding at 6113 different version of d2 could use different port to serve. 
                   # Such as 1.09 use  6109, 113 use 6113,  110 use 6210,  114 use 6214
 CCCC=${IP}    # d2dbs binding at 6114
 D2DBS_PORT=6114    # d2cs  binding at 6113 different version of d2 could use different port to serve. Such as 1.09 use  6109, 
 DDDD=${IP}    # d2gs  binding at 4000, this port can not change.
-VERSION=$5
+VERSION=$6
 
 
 echo '------'
@@ -517,7 +520,20 @@ echo '------'
 case "${ACT}" in
     setup)
         # Dispaly_Selection
-        Setup_Pvpgn
+        case "${TASK}" in
+            pvpgn)
+                Setup_Pvpgn
+            ;;
+            d2cs)
+                Setup_d2cs '/home/pvpgn'_$REALM_NAME $REALM_NAME ${DDDD} ${D2CS_PORT} ${AAAA}
+            ;;
+            d2dbs)
+                Setup_d2cs '/home/pvpgn' $REALM_NAME ${DDDD} ${D2CS_PORT} ${AAAA}
+            ;;
+            # d2cs)
+            #     Setup_D2cs
+            # ;;
+        esac
         # LNMP_Stack 2>&1 | tee /root/pvpgn-install.log
         ;;
     start|restart)
@@ -537,13 +553,14 @@ case "${ACT}" in
         ;;
     realm)
         # Dispaly_Selection
+        echo 'realm in config_pvpgn.sh'
         REALM_NAME=$2
         REALM_PORT=$3
         VERSION=$4
         EXTIP=$5
         echo 'realm '$REALM_NAME' '$REALM_PORT' '$AAAA
         Add_realm $REALM_NAME $REALM_PORT $AAAA
-        Add_d2gs $REALM_NAME $BBBB $CCCC $DDDD $EXTIP
+        # Add_d2gs $REALM_NAME $BBBB $CCCC $DDDD $EXTIP
         # LAMP_Stack 2>&1 | tee /root/add-d2gs.log
         ;;
     d2gs)

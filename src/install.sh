@@ -1,7 +1,7 @@
 #!/bin/bash
-# wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh -s help
-# wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh <(cat) </dev/tty
-# tmux new-session -ds pvpgn; tmux send-keys -t pvpgn 'wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh <(cat) </dev/tty' ENTER; tmux a -t pvpgn;
+# wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh -s help
+# wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh <(cat) </dev/tty
+# tmux new-session -ds pvpgn; tmux send-keys -t pvpgn 'wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh <(cat) </dev/tty' ENTER; tmux a -t pvpgn;
 
 Color_Text()
 {
@@ -521,6 +521,15 @@ case "${ACT}" in
     pvpgn)
         # Dispaly_Selection
         echo "Pvpgn install is starting ..."
+        mkdir -p /home/pvpgn/var
+        mkdir -p /home/d2gs_base
+        cd /home/d2gs_base
+        wget -q https://ia801809.us.archive.org/29/items/d2gs-base.-7z/D2GS_Base.7z
+        7za x -y D2GS_Base.7z
+        mv D2GS_Base/* .
+        rm D2GS_Base -rf
+        rm D2GS_Base.7z -rf
+
         wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/build_docker.sh | sh
 
         docker ps
@@ -533,13 +542,13 @@ case "${ACT}" in
         if [ -z ${EXTIP} ]; then
           EXTIP=$(ip a | grep -v 'inet6' | grep 'inet' | grep -v 'host lo' | cut -d'/' -f1 | grep -o '[0-9].*' | sed -n '1p')
         fi
-        docker run -dt --name pvpgn -p $EXTIP:6112:6112 -p $EXTIP:6112:6112/udp -p $EXTIP:6113:6113 -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
+        docker run -dt --privileged=true -v /home/pvpgn/var:/home/pvpgn/var -v /home/d2gs_base:/home/d2gs_base --name pvpgn -p $EXTIP:6112:6112 -p $EXTIP:6112:6112/udp -p $EXTIP:6113:6113 -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
         # 登录容器修改配置
         # Start pvpgn
         docker exec -it pvpgn rm -rf /home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn wget -q https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn chmod +x /home/pvpgn/config_pvpgn.sh
-        docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup $EXTIP $REALM_NAME 6113 $D2Select
+        docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup pvpgn $EXTIP $REALM_NAME 6113 $D2Select
         docker exec -it -w /home/pvpgn pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh start
 
         # Start D2GS
@@ -572,16 +581,35 @@ case "${ACT}" in
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh realm $REALM_NAME ${REALM_PORT} $D2Select $DDDD
         
         # Create a new d2gs container for the new realm and point the 4000 port.
-        docker run -dt --name pvpgn-$REALM_NAME -p $DDDD:$REALM_PORT:$REALM_PORT -p $DDDD:4000:4000 wqmeng:pvpgn /bin/bash
+        docker run -dt -v /home/d2gs_base:/home/d2gs_base --name pvpgn-$REALM_NAME -p $DDDD:$REALM_PORT:$REALM_PORT -p $DDDD:4000:4000 wqmeng:pvpgn /bin/bash
         # 登录容器修改配置
         # Create a new container, and run d2gs for the new realm.
-        docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh $D2Select
+
+        # Setup_d2cs '/home/pvpgn' $REALM_NAME ${DDDD} ${D2CS_PORT} ${AAAA}
+        # Setup_d2dbs '/home/pvpgn' ${DDDD}
+        # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2cs $EXTIP $REALM_NAME ${REALM_PORT} $D2Select
+        REALM_INNERIP=$(docker inspect pvpgn-$REALM_NAME | grep IPAddress | sed -n '1p' | cut -d '"' -f 4)
+
+        docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2cs $REALM_INNERIP $REALM_NAME ${REALM_PORT} $D2Select
+        docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2dbs $REALM_INNERIP $REALM_NAME 6114 $D2Select
+
+        docker exec -it pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $D2Select
+
+        # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2dbs $EXTIP $REALM_NAME 6114 $D2Select
+        # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $D2Select
 
         # LNMPA_Stack 2>&1 | tee /root/add-realm.log
         ;;
     d2gs)
         # Dispaly_Selection
-        REALMSelect=$2
+        docker run -dt -v /home/d2gs_base:/home/d2gs_base --name pvpgn-$REALM_NAME -p $DDDD:$REALM_PORT:$REALM_PORT -p $DDDD:4000:4000 wqmeng:pvpgn /bin/bash
+
+        REALM_INNERIP=$(docker inspect pvpgn-$REALM_NAME | grep IPAddress | sed -n '1p' | cut -d '"' -f 4)
+        
+        docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2cs $REALM_INNERIP $REALM_NAME ${REALM_PORT} $D2Select
+        docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2dbs $REALM_INNERIP $REALM_NAME 6114 $D2Select
+
+        docker exec -it pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $D2Select
         # LAMP_Stack 2>&1 | tee /root/add-d2gs.log
         ;;
     help|-h|-help)
