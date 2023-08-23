@@ -1,6 +1,7 @@
 #!/bin/bash
 # wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh -s help
 # wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh <(cat) </dev/tty
+# tmux new-session -ds pvpgn; tmux send-keys -t pvpgn 'wget -O - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh <(cat) </dev/tty' ENTER; tmux a -t pvpgn;
 
 Color_Text()
 {
@@ -366,7 +367,16 @@ Dispaly_Selection()
 
     if [ "${ACTSelect}" = "1" ]; then
         EXTIP=$(ip a | grep -v 'inet6' | grep 'inet' | grep -v 'host lo' | cut -d'/' -f1 | grep -o '[0-9].*' | grep -v '10.88' | sed -n '1p')
-    else 
+
+        Echo_Yellow "Please setup Output IP, default is: $EXTIP"
+        read -p "Please enter: " READ_EXTIP
+        if [ "${READ_EXTIP}" != "" ]; then
+            EXTIP=${READ_EXTIP}
+        fi
+        DDDD=$EXTIP
+        echo "Your Output IP: ${EXTIP}"
+    else
+        EXTIP=$(ip a | grep -v 'inet6' | grep 'inet' | grep -v 'host lo' | cut -d'/' -f1 | grep -o '[0-9].*' | grep -v '10.88' | sed -n '1p')
         ALL_EXTIPS=$(ip a | grep -v 'inet6' | grep 'inet' | grep -v 'host lo' | cut -d'/' -f1 | grep -o '[0-9].*' | grep -v '10.88')
         ALL_USEDIPS=$(netstat -ntl | grep 'tcp' | grep -v 'tcp6' | grep '4000' | cut -d ':' -f1 | tr -s ' ' | cut -d ' ' -f4)
 
@@ -385,15 +395,19 @@ Dispaly_Selection()
             done
 
             if [ "${IPUSED}" = false ]; then
-                EXTIP=${ARR_ALL_EXTIPS[i]}
+                DDDD=${ARR_ALL_EXTIPS[i]}
                 break
             fi
         done
 
         # echo $EXTIP
-
-        # ARR_ALL_USEDIPS=(`echo $ALL_USEDIPS | tr ' ' ' '`)
-
+        Echo_Yellow "Please setup D2GS Output IP, default is: $DDDD"
+        read -p "Please enter: " READ_EXTIP
+        if [ "${READ_EXTIP}" != "" ]; then
+            DDDD=${READ_EXTIP}
+        fi
+        echo "Your pvpgn IP: ${EXTIP}"
+        echo "Your D2GS IP: ${DDDD}"
     fi
 
     # 
@@ -403,12 +417,6 @@ Dispaly_Selection()
     #     echo "$i：${array[i]}"
     # done
 
-    Echo_Yellow "Please setup Output IP, default is: $EXTIP"
-    read -p "Please enter: " READ_EXTIP
-    if [ "${READ_EXTIP}" != "" ]; then
-        EXTIP=${READ_EXTIP}
-    fi
-    echo "Your Output IP: ${EXTIP}"
 }
 
 Print_Sucess_Info()
@@ -442,6 +450,8 @@ Print_Sucess_Info()
 
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
+
+dnf -y install shyaml tmux
 
 # Check if user is root
 if [ $(id -u) != "0" ]; then
@@ -481,8 +491,9 @@ case "$1" in
         # Dispaly_Selection
         ACT="realm"
         REALM_NAME=$2
-        REALM_PORT=$3
-        D2Select=$4
+        DDDD=$3
+        REALM_PORT=$4
+        D2Select=$5
         # LNMPA_Stack 2>&1 | tee /root/add-realm.log
         ;;
     d2gs)
@@ -554,11 +565,14 @@ case "${ACT}" in
         ;;
     realm)
         # Add realm to pvpgn
-        # docker run -dt --name pvpgn -p $EXTIP:$REALM_PORT:$REALM_PORT wqmeng:pvpgn /bin/bash
+        # docker run -dt --name pvpgn -p $DDDD:$REALM_PORT:$REALM_PORT wqmeng:pvpgn /bin/bash
 
-        docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh realm $REALM_NAME ${REALM_PORT} $D2Select $EXTIP
+        echo 'Add realm to pvpgn'
+
+        docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh realm $REALM_NAME ${REALM_PORT} $D2Select $DDDD
         
-        # docker run -dt --name pvpgn-$REALM_NAME -p $EXTIP:$REALM_PORT:$REALM_PORT -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
+        # Create a new d2gs container for the new realm and point the 4000 port.
+        docker run -dt --name pvpgn-$REALM_NAME -p $DDDD:$REALM_PORT:$REALM_PORT -p $DDDD:4000:4000 wqmeng:pvpgn /bin/bash
         # 登录容器修改配置
         # Create a new container, and run d2gs for the new realm.
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh $D2Select
