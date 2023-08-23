@@ -52,11 +52,11 @@ Dispaly_Selection()
         ACT=pvpgn
         ;;
     2)
-        echo "You will Add realm to a pvpgn"
+        echo "You will Add a realm to pvpgn"
         ACT=realm
         ;;
     3)
-        echo "You will Add d2gs to a realm"
+        echo "You will Add a d2gs to a realm"
         ACT=d2gs
         ;;
     # 4)
@@ -254,11 +254,16 @@ Dispaly_Selection()
     if  [[ "${ACTSelect}" = "1" || "${ACTSelect}" = "2" ]]; then
         #set realm name and port
 
-        REALM_NAME="D2CS"
-        Echo_Yellow "Please setup Realm name, default is: D2CS"
-        read -p "Please enter: " REALM_NAME
-        if [[ "${REALM_NAME}" = "" ]]; then
+        if [ "${ACTSelect}" = "2" ]; then
+            REALM_NAME="D2CS_Port"
+        else
             REALM_NAME="D2CS"
+        fi
+
+        Echo_Yellow "Please setup Realm name, default is: "$REALM_NAME
+        read -p "Please enter: " READ_REALM_NAME
+        if [[ "${READ_REALM_NAME}" != "" ]]; then
+            REALM_NAME=${READ_REALM_NAME}
         fi
         echo "Your Realm name: ${REALM_NAME}"
 
@@ -300,7 +305,11 @@ Dispaly_Selection()
         if [[ "${READ_REALM_PORT}" != "" ]]; then
             REALM_PORT=${READ_REALM_PORT}
         fi
+        if [ "${REALM_NAME}" = "D2CS_Port" ]; then
+            REALM_NAME="D2CS_"${REALM_PORT}
+        fi
         echo "Your Realm port: ${REALM_PORT}"
+        echo "Your Realm name: ${REALM_NAME}"
 
         #which D2 Version do you want to install?
         echo "==========================="
