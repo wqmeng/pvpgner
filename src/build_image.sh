@@ -30,7 +30,7 @@ cd /home/src/${GAMESHORT}_$VERSION
 rm /home/src/${GAMESHORT}_$VERSION/Dockerfile -rf
 
 cat >>/home/src/${GAMESHORT}_$VERSION/Dockerfile<<EOF
-FROM dokken/centos-stream-9
+FROM docker.io/dokken/centos-stream-9:latest
 LABEL game.name="$GAMENAME" game.version="$VERSION" image.maintainer="$MAINTAINER" image.description="A Docker container for pvpgn $GAMENAME $VERSION Server for Closed Battle.Net on centos-stream-9"
 RUN wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/build_wine.sh | sh -s $VERSION
 EOF
