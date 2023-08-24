@@ -536,10 +536,28 @@ case "${ACT}" in
         ;;
     start|restart)
         # Dispaly_Selection
-        Start_Pvpgn '/home/pvpgn'
-        Start_d2cs '/home/pvpgn'
-        Start_d2dbs '/home/pvpgn'
-        Start_d2gs '/home/d2gs' 
+        case "${TASK}" in
+            pvpgn)
+                Start_Pvpgn '/home/pvpgn'
+            ;;
+            d2cs)
+                Start_d2cs '/home/pvpgn'
+            ;;
+            d2dbs)
+                Start_d2dbs '/home/pvpgn'
+            ;;
+            d2gs)
+                Start_d2gs '/home/d2gs'
+            ;;
+            *)
+                # Dispaly_Selection
+                Start_Pvpgn '/home/pvpgn'
+                Start_d2cs '/home/pvpgn'
+                Start_d2dbs '/home/pvpgn'
+                Start_d2gs '/home/d2gs'
+                # Echo_Red "Usage: $0 {pvpgn|realm|d2gs}"
+                ;;
+        esac
         # Setup_Pvpgn
         # LNMP_Stack 2>&1 | tee /root/pvpgn-install.log
         ;;

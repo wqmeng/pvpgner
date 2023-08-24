@@ -621,6 +621,7 @@ case "${ACT}" in
         echo $D2Select
 
         docker exec -it pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $BBBB $CCCC $D2Select
+        docker exec -it -w /home/d2gs pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh start
 
         # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2dbs $EXTIP $REALM_NAME 6114 $D2Select
         # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $D2Select
