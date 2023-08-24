@@ -128,7 +128,7 @@ Setup_d2gs() {
         CONF_PATH=$1
     fi
 
-
+    VERSION=$5
     mkdir -p /home/d2gs
     cd /home/d2gs    
     # wget -q http://10.0.0.10/docker/d2gs/D2GS_Base.7z
@@ -174,7 +174,7 @@ Setup_Pvpgn() {
     Setup_realm '/home/pvpgn' $REALM_NAME "$REALM_NAME for $VERSION" ${BBBB} ${D2CS_PORT}
     Setup_bnetd '/home/pvpgn'
     Setup_d2cs '/home/pvpgn' $REALM_NAME ${DDDD} ${D2CS_PORT} ${AAAA}
-    Setup_d2gs '/home/d2gs' ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0'
+    Setup_d2gs '/home/d2gs' ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
     Setup_d2dbs '/home/pvpgn' ${DDDD}
     Setup_address_translation '/home/pvpgn' ${BBBB} ${EXTIP} ${D2CS_PORT} ${DDDD} ${EXTIP}
     rm -rf /home/pvpgn/inner_ip
@@ -297,7 +297,7 @@ Add_realm() {
     # Setup_d2dbs '/home/pvpgn' ${DDDD}
 
     # d2gs can not create in the same pvpgn docker container, as it already has one d2gs takes the port 4000.
-    # Setup_d2gs '/home/d2gs' ${NEW_REALM_IP} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0'
+    # Setup_d2gs '/home/d2gs' ${NEW_REALM_IP} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
 
     # When we add a new realm, we should create a new gameserver to it.
 
@@ -310,17 +310,17 @@ Add_realm() {
 }
 
 Add_d2gs() {
-    REALM_NAME=$1
+    # REALM_NAME=$1
     # d2cs ip
-    BBBB=$2
+    BBBB=$1
     # d2dbs ip
-    CCCC=$3
+    CCCC=$2
     # d2gs input ip
-    DDDD=$4
+    # DDDD=$3
     # d2gs output
-    EXTIP=$5
+    VERSION=$3
 
-    Setup_d2gs '/home/d2gs' ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0'
+    Setup_d2gs '/home/d2gs' ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
     # address translation should be correct on the pvpgn container, not here?
     # Setup_address_translation '/home/pvpgn' ${BBBB} ${EXTIP} ${D2CS_PORT} ${DDDD} ${EXTIP}
 }
@@ -462,7 +462,7 @@ echo '------'
 
 #wine regedit /home/d2gs/d2gs.reg
 
-#Setup_d2gs '/home/d2gs' ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0'
+#Setup_d2gs '/home/d2gs' ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
 
 ## -----
 #D2DBSConsole.exe          分配内网IP 10.88.0.19 (c.c.c.c) : 6114
@@ -563,14 +563,20 @@ case "${ACT}" in
         EXTIP=$5
         echo 'realm '$REALM_NAME' '$REALM_PORT' '$AAAA
         Add_realm $REALM_NAME $REALM_PORT $AAAA
-        # Add_d2gs $REALM_NAME $BBBB $CCCC $DDDD $EXTIP
+        # Add_d2gs $BBBB $CCCC $VERSION
         # LAMP_Stack 2>&1 | tee /root/add-d2gs.log
         ;;
     d2gs)
         # Dispaly_Selection
-        REALM_NAME=$2
+        # REALM_NAME=$2
+        BBBB=$2
+        CCCC=$3
+        # DDDD=$5
+        # EXTIP=$6
+        VERSION=$6
+        #  d2gs $REALM_NAME $BBBB $CCCC $DDDD $EXTIP $D2Select
         # Add_realm
-        Add_d2gs $REALM_NAME $BBBB $CCCC $DDDD $EXTIP
+        Add_d2gs $BBBB $CCCC $VERSION
         # LAMP_Stack 2>&1 | tee /root/add-d2gs.log
         ;;
     delete)

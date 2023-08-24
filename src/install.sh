@@ -607,7 +607,11 @@ case "${ACT}" in
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2cs $REALM_INNERIP $REALM_NAME ${REALM_PORT} $D2Select
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2dbs $REALM_INNERIP $REALM_NAME 6114 $D2Select
 
-        docker exec -it pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $D2Select
+        BBBB=$EXTIP
+        CCCC=$EXTIP
+        # DDDD=$EXTIP
+        # docker exec -it pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $REALM_NAME $BBBB $CCCC $DDDD $EXTIP $D2Select
+        docker exec -it pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $BBBB $CCCC $D2Select
 
         # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2dbs $EXTIP $REALM_NAME 6114 $D2Select
         # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $D2Select
