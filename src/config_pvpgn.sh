@@ -268,7 +268,7 @@ Start_d2gs() {
     # wine D2GS.exe 2>&1 | tee /home/output
     # nohup bash '(wine D2GS.exe) |& tee out.log'
     nohup bash -c "wine D2GS.exe &" </dev/null &>/dev/null &
-    sleep 1
+    sleep 3
 }
 
 Add_realm() {
@@ -544,7 +544,7 @@ case "${ACT}" in
         Start_Pvpgn '/home/pvpgn'
         Start_d2cs '/home/pvpgn'
         Start_d2dbs '/home/pvpgn'
-        # Start_d2gs '/home/d2gs' 
+        Start_d2gs '/home/d2gs' 
         # Setup_Pvpgn
         # LNMP_Stack 2>&1 | tee /root/pvpgn-install.log
         ;;
