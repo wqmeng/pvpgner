@@ -567,7 +567,7 @@ case "${ACT}" in
         CCCC=$3
         # DDDD=$5
         # EXTIP=$6
-        VERSION=$6
+        VERSION=$4
         #  d2gs $REALM_NAME $BBBB $CCCC $DDDD $EXTIP $D2Select
         # Add_realm
         Add_d2gs $BBBB $CCCC $VERSION

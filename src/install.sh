@@ -617,6 +617,9 @@ case "${ACT}" in
         docker exec -it pvpgn-$REALM_NAME rm -rf /home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn-$REALM_NAME wget -q https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn-$REALM_NAME chmod +x /home/pvpgn/config_pvpgn.sh
+
+        echo $D2Select
+
         docker exec -it pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $BBBB $CCCC $D2Select
 
         # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2dbs $EXTIP $REALM_NAME 6114 $D2Select
