@@ -1,7 +1,7 @@
 #!/bin/bash
 # wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh -s help
 # wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh <(cat) </dev/tty
-# dnf -y install tmux; tmux new-session -ds pvpgn; tmux send-keys -t pvpgn 'wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh <(cat) </dev/tty' ENTER; tmux a -t pvpgn;
+# dnf -yq install tmux; tmux new-session -ds pvpgn; tmux send-keys -t pvpgn 'wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/install.sh | sh <(cat) </dev/tty' ENTER; tmux a -t pvpgn;
 
 Color_Text()
 {
@@ -527,7 +527,12 @@ case "${ACT}" in
         dnf -yq install shyaml
         touch /etc/containers/nodocker
         systemctl enable --now podman
-        mkdir -p /home/pvpgn/var
+        mkdir -p /home/pvpgn/
+        cd /home
+        wget -q https://github.com/wqmeng/pvpgner/raw/main/pvpgn/pvpgn1.99.8.0.0-rc1-PRO.7z
+        7za x -y pvpgn1.99.8.0.0-rc1-PRO.7z
+        \cp -r /home/pvpgn1.99.8.0.0-rc1-PRO/var /home/pvpgn
+        rm pvpgn1.99.8.0.0-rc1-PRO* -rf
 
         if [ ! -f "/home/d2gs_base/d2data.mpq" ]; then
             mkdir -p /home/d2gs_base
