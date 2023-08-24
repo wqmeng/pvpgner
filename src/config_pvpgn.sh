@@ -219,6 +219,7 @@ Start_Pvpgn() {
     cd ${CONF_PATH}
     # wine PvPGNConsole.exe >& /dev/null &
     nohup bash -c "wine PvPGNConsole.exe &" </dev/null &>/dev/null &
+    sleep 1
 }
 
 Start_d2cs() {
@@ -233,6 +234,7 @@ Start_d2cs() {
     cd ${CONF_PATH}
     # wine D2CSConsole.exe >& /dev/null &
     nohup bash -c "wine D2CSConsole.exe &" </dev/null &>/dev/null &
+    sleep 1
 }
 
 Start_d2dbs() {
@@ -246,6 +248,7 @@ Start_d2dbs() {
     cd ${CONF_PATH}
     # wine D2DBSConsole.exe >& /dev/null &
     nohup bash -c "wine D2DBSConsole.exe &" </dev/null &>/dev/null &
+    sleep 1
 }
 
 Start_d2gs() {

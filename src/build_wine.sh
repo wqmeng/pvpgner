@@ -5,13 +5,13 @@ else
   VERSION=$1
 fi
 
-dnf -qy clean all
-dnf -qy update
+dnf -yq clean all
+dnf -yq update
 
-dnf -qy install wget tmux gcc libX11-devel freetype-devel zlib-devel libxcb-devel libxslt-devel libgcrypt-devel libxml2-devel gnutls-devel libpng-devel libjpeg-turbo-devel libtiff-devel dbus-devel fontconfig-devel
-dnf -qy groupinstall 'Development Tools'
-dnf -qy install --assumeyes epel-release
-dnf -qy install --assumeyes p7zip
+dnf -yq install wget tmux gcc libX11-devel freetype-devel zlib-devel libxcb-devel libxslt-devel libgcrypt-devel libxml2-devel gnutls-devel libpng-devel libjpeg-turbo-devel libtiff-devel dbus-devel fontconfig-devel
+dnf -yq groupinstall 'Development Tools'
+dnf -yq install --assumeyes epel-release
+dnf -yq install --assumeyes p7zip
 
 mkdir -p /home/src
 cd /home/src
@@ -24,8 +24,8 @@ tar -xf wine-8.13.tar.xz -C /tmp/
 
 cd /tmp/wine-8.13/
 
-dnf -qy install glibc-devel.i686
-dnf -qy install gnutls-devel.i686
+dnf -yq install glibc-devel.i686
+dnf -yq install gnutls-devel.i686
 
 #./configure --enable-win64
 # ./configure --enable-win64 --without-x --without-freetype --disable-win16
@@ -52,7 +52,7 @@ rm /home/d2gs -rf
 wget -q https://github.com/wqmeng/pvpgner/raw/main/pvpgn/pvpgn1.99.8.0.0-rc1-PRO.7z
 7za x -y pvpgn1.99.8.0.0-rc1-PRO.7z
 mv pvpgn1.99.8.0.0-rc1-PRO pvpgn
-# rm pvpgn1.99.8.0.0-rc1-PRO -rf
+rm pvpgn1.99.8.0.0-rc1-PRO* -rf
 #rm pvpgn1.99.8.0.0-rc1-PRO.7z -rf
 
 cd /home/pvpgn

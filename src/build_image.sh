@@ -4,24 +4,24 @@ GAMENAME=diablo2
 GAMESHORT=d2
 VERSION=$1
 MAINTAINER=wqmeng@gmail.com
-# dnf -qy clean all
-# dnf -qy update
-# dnf -qy install podman podman-docker
+# dnf -yq clean all
+# dnf -yq update
+# dnf -yq install podman podman-docker
 # echo >> /etc/containers/nodocker
 
 # systemctl enable --now podman
 
 # podman run hello-world
 
-# dnf -qy install podman-compose
+# dnf -yq install podman-compose
 
 # podman-compose up -d
 
 # podman-compose down
 
-# dnf -qy clean all
-# dnf -qy update
-# dnf -qy --refresh install wine
+# dnf -yq clean all
+# dnf -yq update
+# dnf -yq --refresh install wine
 
 # cd /home
 mkdir -p /home/src/${GAMESHORT}_$VERSION
