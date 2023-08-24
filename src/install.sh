@@ -256,9 +256,9 @@ Dispaly_Selection()
         #set realm name and port
 
         if [ "${ACTSelect}" = "2" ]; then
-            REALM_NAME="D2CS_Port"
+            REALM_NAME="Realm_Port"
         else
-            REALM_NAME="D2CS"
+            REALM_NAME="Realm"
         fi
 
         Echo_Yellow "Please setup Realm name, default is: "$REALM_NAME
@@ -306,8 +306,8 @@ Dispaly_Selection()
         if [[ "${READ_REALM_PORT}" != "" ]]; then
             REALM_PORT=${READ_REALM_PORT}
         fi
-        if [ "${REALM_NAME}" = "D2CS_Port" ]; then
-            REALM_NAME="D2CS_"${REALM_PORT}
+        if [ "${REALM_NAME}" = "Realm_Port" ]; then
+            REALM_NAME="Realm_"${REALM_PORT}
         fi
         echo "Your Realm port: ${REALM_PORT}"
         echo "Your Realm name: ${REALM_NAME}"
@@ -356,11 +356,11 @@ Dispaly_Selection()
 
     if [ "${ACTSelect}" = "3" ]; then
         # We should get all the realm names from a conf file, such as ylmp
-        REALM_NAME="D2CS"
-        Echo_Yellow "Please select which Realm will you add the D2GS to, default is: D2CS"
+        REALM_NAME="Realm"
+        Echo_Yellow "Please select which Realm will you add the D2GS to, default is: Realm"
         read -p "Please enter: " REALM_NAME
         if [ "${REALM_NAME}" = "" ]; then
-            REALM_NAME="D2CS"
+            REALM_NAME="Realm"
         fi
         echo "Your Realm name: ${REALM_NAME}"        
     fi
@@ -595,7 +595,7 @@ case "${ACT}" in
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh realm $REALM_NAME ${REALM_PORT} $D2Select $DDDD
         
         # Create a new d2gs container for the new realm and point the 4000 port.
-        docker run -dt -v /home/d2gs_base:/home/d2gs_base --name pvpgn-$REALM_NAME -p $DDDD:$REALM_PORT:$REALM_PORT -p $DDDD:4000:4000 wqmeng:pvpgn /bin/bash
+        docker run -dt --privileged=true -v /home/d2gs_base:/home/d2gs_base --name pvpgn-$REALM_NAME -p $DDDD:$REALM_PORT:$REALM_PORT -p $DDDD:4000:4000 wqmeng:pvpgn /bin/bash
         # 登录容器修改配置
         # Create a new container, and run d2gs for the new realm.
 
@@ -616,7 +616,7 @@ case "${ACT}" in
         ;;
     d2gs)
         # Dispaly_Selection
-        docker run -dt -v /home/d2gs_base:/home/d2gs_base --name pvpgn-$REALM_NAME -p $DDDD:$REALM_PORT:$REALM_PORT -p $DDDD:4000:4000 wqmeng:pvpgn /bin/bash
+        docker run -dt --privileged=true -v /home/d2gs_base:/home/d2gs_base --name pvpgn-$REALM_NAME -p $DDDD:$REALM_PORT:$REALM_PORT -p $DDDD:4000:4000 wqmeng:pvpgn /bin/bash
 
         REALM_INNERIP=$(docker inspect pvpgn-$REALM_NAME | grep IPAddress | sed -n '1p' | cut -d '"' -f 4)
         
