@@ -12,9 +12,8 @@ dnf -yq clean all
 dnf -yq update
 # dnf -yq --refresh install wine
 dnf -yq install podman podman-docker podman-compose
-rm /etc/containers/nodocker -rf
-echo >> /etc/containers/nodocker
-systemctl enable --now podman
+# touch /etc/containers/nodocker
+# systemctl enable --now podman
 # podman run hello-world
 #podman-compose up -d
 #podman-compose down

@@ -451,10 +451,6 @@ Print_Sucess_Info()
 PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
-dnf -qy install shyaml tmux podman
-dnf -qy install --assumeyes epel-release
-dnf -qy install --assumeyes p7zip
-
 # Check if user is root
 if [ $(id -u) != "0" ]; then
     echo "Error: You must be root to run this script, please use root to install pvpgn"
@@ -523,6 +519,12 @@ case "${ACT}" in
     pvpgn)
         # Dispaly_Selection
         echo "Pvpgn install is starting ..."
+        dnf -qy install wget tmux podman
+        dnf -qy install --assumeyes epel-release
+        dnf -qy install --assumeyes p7zip
+        dnf -qy install shyaml
+        touch /etc/containers/nodocker
+        systemctl enable --now podman
         mkdir -p /home/pvpgn/var
         mkdir -p /home/d2gs_base
         cd /home/d2gs_base
