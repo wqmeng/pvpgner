@@ -591,6 +591,9 @@ case "${ACT}" in
         # docker run -dt --name pvpgn -p $DDDD:$REALM_PORT:$REALM_PORT wqmeng:pvpgn /bin/bash
 
         echo 'Add realm to pvpgn'
+        docker exec -it pvpgn rm -rf /home/pvpgn/config_pvpgn.sh
+        docker exec -it pvpgn wget -q https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
+        docker exec -it pvpgn chmod +x /home/pvpgn/config_pvpgn.sh
 
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh realm $REALM_NAME ${REALM_PORT} $D2Select $DDDD
         
@@ -611,6 +614,9 @@ case "${ACT}" in
         CCCC=$EXTIP
         # DDDD=$EXTIP
         # docker exec -it pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $REALM_NAME $BBBB $CCCC $DDDD $EXTIP $D2Select
+        docker exec -it pvpgn-$REALM_NAME rm -rf /home/pvpgn/config_pvpgn.sh
+        docker exec -it pvpgn-$REALM_NAME wget -q https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
+        docker exec -it pvpgn-$REALM_NAME chmod +x /home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $BBBB $CCCC $D2Select
 
         # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2dbs $EXTIP $REALM_NAME 6114 $D2Select
@@ -624,9 +630,15 @@ case "${ACT}" in
 
         REALM_INNERIP=$(docker inspect pvpgn-$REALM_NAME | grep IPAddress | sed -n '1p' | cut -d '"' -f 4)
         
+        docker exec -it pvpgn rm -rf /home/pvpgn/config_pvpgn.sh
+        docker exec -it pvpgn wget -q https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
+        docker exec -it pvpgn chmod +x /home/pvpgn/config_pvpgn.sh        
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2cs $REALM_INNERIP $REALM_NAME ${REALM_PORT} $D2Select
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2dbs $REALM_INNERIP $REALM_NAME 6114 $D2Select
 
+        docker exec -it pvpgn-$REALM_NAME rm -rf /home/pvpgn/config_pvpgn.sh
+        docker exec -it pvpgn-$REALM_NAME wget -q https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
+        docker exec -it pvpgn-$REALM_NAME chmod +x /home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $D2Select
         # LAMP_Stack 2>&1 | tee /root/add-d2gs.log
         ;;
