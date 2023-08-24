@@ -519,20 +519,25 @@ case "${ACT}" in
     pvpgn)
         # Dispaly_Selection
         echo "Pvpgn install is starting ..."
-        dnf -qy install wget tmux podman
-        dnf -qy install --assumeyes epel-release
-        dnf -qy install --assumeyes p7zip
-        dnf -qy install shyaml
+        dnf -yq clean all
+        dnf -yq update
+        dnf -yq install wget tmux podman
+        dnf -yq install --assumeyes epel-release
+        dnf -yq install --assumeyes p7zip
+        dnf -yq install shyaml
         touch /etc/containers/nodocker
         systemctl enable --now podman
         mkdir -p /home/pvpgn/var
-        mkdir -p /home/d2gs_base
-        cd /home/d2gs_base
-        wget -q https://ia801809.us.archive.org/29/items/d2gs-base.-7z/D2GS_Base.7z
-        7za x -y D2GS_Base.7z
-        mv D2GS_Base/* .
-        rm D2GS_Base -rf
-        rm D2GS_Base.7z -rf
+
+        if [ ! -f "/home/d2gs_base/d2data.mpq" ]; then
+            mkdir -p /home/d2gs_base
+            cd /home/d2gs_base
+            wget -q https://ia801809.us.archive.org/29/items/d2gs-base.-7z/D2GS_Base.7z
+            7za x -y D2GS_Base.7z
+            mv D2GS_Base/* .
+            rm D2GS_Base -rf
+            rm D2GS_Base.7z -rf
+        fi
 
         wget -qO - https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/build_docker.sh | sh
 

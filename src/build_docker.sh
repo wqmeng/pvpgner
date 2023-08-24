@@ -8,8 +8,6 @@ else
   VERSION=$1
 fi
 
-dnf -yq clean all
-dnf -yq update
 # dnf -yq --refresh install wine
 dnf -yq install podman podman-docker podman-compose
 # touch /etc/containers/nodocker
