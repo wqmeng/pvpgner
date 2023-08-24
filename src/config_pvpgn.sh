@@ -122,13 +122,7 @@ Setup_address_translation() {
 }
 
 Setup_d2gs() {
-    if [ "$1" == "" ]; then
-        CONF_PATH=/home/d2gs
-    else
-        CONF_PATH=$1
-    fi
-
-    VERSION=$5
+    VERSION=$4
     mkdir -p /home/d2gs
     cd /home/d2gs    
     # wget -q http://10.0.0.10/docker/d2gs/D2GS_Base.7z
@@ -147,9 +141,9 @@ Setup_d2gs() {
     ln -s -t /home/d2gs/ /home/d2gs_base/*
     touch d2_${VERSION}
 
-    D2CS_IP=$2
-    D2DBS_IP=$3
-    D2GS_PASSWD=$4
+    D2CS_IP=$1
+    D2DBS_IP=$2
+    D2GS_PASSWD=$3
     sed -i '/^EnableWarden/c EnableWarden=0' ${CONF_PATH}/d2server.ini
     sed -i '/^EnableEthSocketBugFix/c EnableEthSocketBugFix=0' ${CONF_PATH}/d2server.ini
     sed -i '/^DisableBugMF/c DisableBugMF=0' ${CONF_PATH}/d2server.ini
@@ -174,7 +168,7 @@ Setup_Pvpgn() {
     Setup_realm '/home/pvpgn' $REALM_NAME "$REALM_NAME for $VERSION" ${BBBB} ${D2CS_PORT}
     Setup_bnetd '/home/pvpgn'
     Setup_d2cs '/home/pvpgn' $REALM_NAME ${DDDD} ${D2CS_PORT} ${AAAA}
-    Setup_d2gs '/home/d2gs' ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
+    Setup_d2gs ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
     Setup_d2dbs '/home/pvpgn' ${DDDD}
     Setup_address_translation '/home/pvpgn' ${BBBB} ${EXTIP} ${D2CS_PORT} ${DDDD} ${EXTIP}
     rm -rf /home/pvpgn/inner_ip
@@ -297,7 +291,7 @@ Add_realm() {
     # Setup_d2dbs '/home/pvpgn' ${DDDD}
 
     # d2gs can not create in the same pvpgn docker container, as it already has one d2gs takes the port 4000.
-    # Setup_d2gs '/home/d2gs' ${NEW_REALM_IP} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
+    # Setup_d2gs ${NEW_REALM_IP} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
 
     # When we add a new realm, we should create a new gameserver to it.
 
@@ -320,7 +314,7 @@ Add_d2gs() {
     # d2gs output
     VERSION=$3
 
-    Setup_d2gs '/home/d2gs' ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
+    Setup_d2gs ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
     # address translation should be correct on the pvpgn container, not here?
     # Setup_address_translation '/home/pvpgn' ${BBBB} ${EXTIP} ${D2CS_PORT} ${DDDD} ${EXTIP}
 }
@@ -462,7 +456,7 @@ echo '------'
 
 #wine regedit /home/d2gs/d2gs.reg
 
-#Setup_d2gs '/home/d2gs' ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
+#Setup_d2gs ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
 
 ## -----
 #D2DBSConsole.exe          分配内网IP 10.88.0.19 (c.c.c.c) : 6114
