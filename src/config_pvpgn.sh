@@ -36,8 +36,8 @@ Setup_realm() {
   REALM_DES=$3
   REALM_IP=$4
   REALM_PORT=$5
-  sed -i '/^"'${REALM_NAME}'"/d' ${CONF_PATH}/conf/realm.conf
-  sed -i '$a "'${REALM_NAME}'"                 "'"${REALM_DES}"'"            '${REALM_IP}':'${REALM_PORT} ${CONF_PATH}/conf/realm.conf
+  sed -i '/^"'${REALM_NAME}'"/d' /home/pvpgn/conf/realm.conf
+  sed -i '$a "'${REALM_NAME}'"                 "'"${REALM_DES}"'"            '${REALM_IP}':'${REALM_PORT} /home/pvpgn/conf/realm.conf
 }
 
 Setup_d2cs() {
@@ -122,7 +122,7 @@ Setup_address_translation() {
 }
 
 Setup_d2gs() {
-    VERSION=$4
+    VERSION=$5
     mkdir -p /home/d2gs
     CONF_PATH=/home/d2gs
     cd ${CONF_PATH}    
@@ -143,13 +143,22 @@ Setup_d2gs() {
     touch d2_${VERSION}
 
     D2CS_IP=$1
-    D2DBS_IP=$2
-    D2GS_PASSWD=$3
+    D2CS_PORT=$2
+    D2DBS_IP=$3
+    D2GS_PASSWD=$4
     sed -i '/^EnableWarden/c EnableWarden=0' ${CONF_PATH}/d2server.ini
     sed -i '/^EnableEthSocketBugFix/c EnableEthSocketBugFix=0' ${CONF_PATH}/d2server.ini
     sed -i '/^DisableBugMF/c DisableBugMF=0' ${CONF_PATH}/d2server.ini
 
     sed -i '/^"D2CSIP"/c "D2CSIP"="'${D2CS_IP}'"' ${CONF_PATH}/d2gs.reg
+
+    if [ "$D2CS_PORT" != "6113" ]; then
+        REALM_PORTX=$(echo "${D2CS_PORT}" | awk '{printf "%08x\n",$0}')
+    else
+        REALM_PORTX="000017e1"
+    fi
+
+    sed -i '/^"D2CSPort"/c "D2CSPort"=dword:'${REALM_PORTX} ${CONF_PATH}/d2gs.reg
     sed -i '/^"D2DBSIP"/c "D2DBSIP"="'${D2DBS_IP}'"' ${CONF_PATH}/d2gs.reg
     # 4096 MaxGames
     sed -i '/^"MaxGames"/c "MaxGames"=dword:00001000' ${CONF_PATH}/d2gs.reg
@@ -169,7 +178,7 @@ Setup_Pvpgn() {
     Setup_realm '/home/pvpgn' $REALM_NAME "$REALM_NAME for $VERSION" ${BBBB} ${D2CS_PORT}
     Setup_bnetd '/home/pvpgn'
     Setup_d2cs '/home/pvpgn' $REALM_NAME ${DDDD} ${D2CS_PORT} ${AAAA}
-    Setup_d2gs ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
+    Setup_d2gs ${BBBB} ${D2CS_PORT} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
     Setup_d2dbs '/home/pvpgn' ${DDDD}
     Setup_address_translation '/home/pvpgn' ${BBBB} ${EXTIP} ${D2CS_PORT} ${DDDD} ${EXTIP}
     rm -rf /home/pvpgn/inner_ip
@@ -224,11 +233,11 @@ Start_d2cs() {
         CONF_PATH=$1
     fi
 
-    pkill -f 'D2CSConsole'
+    pkill -f $CONF_PATH'/D2CSConsole'
 
     cd ${CONF_PATH}
     # wine D2CSConsole.exe >& /dev/null &
-    nohup bash -c "wine D2CSConsole.exe &" </dev/null &>/dev/null &
+    nohup bash -c "wine $CONF_PATH/D2CSConsole.exe &" </dev/null &>/dev/null &
     sleep 1
 }
 
@@ -285,8 +294,9 @@ Add_realm() {
     # NEW_REAL_IP=$2
     REALM_PORT=$2
     BNETD_IP=$3
+    VERSIONP=$4
 
-    Setup_realm ${CONF_PATH} ${REALM_NAME} '"PvPGN '${REALM_NAME}' Realm"' ${BBBB} ${REALM_PORT}
+    Setup_realm ${CONF_PATH} ${REALM_NAME} "$REALM_NAME for $VERSION" ${BBBB} ${REALM_PORT}
     #Setup_bnetd ${CONF_PATH}
     # Setup_d2cs ${CONF_PATH} ${REALM_NAME} ${BBBB} ${REALM_PORT} ${BNETD_IP}
     # Setup_d2dbs '/home/pvpgn' ${DDDD}
@@ -308,14 +318,15 @@ Add_d2gs() {
     # REALM_NAME=$1
     # d2cs ip
     BBBB=$1
+    D2CS_PORT=$2
     # d2dbs ip
-    CCCC=$2
+    CCCC=$3
     # d2gs input ip
     # DDDD=$3
     # d2gs output
-    VERSION=$3
+    VERSION=$4
 
-    Setup_d2gs ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
+    Setup_d2gs ${BBBB} ${D2CS_PORT} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
     # address translation should be correct on the pvpgn container, not here?
     # Setup_address_translation '/home/pvpgn' ${BBBB} ${EXTIP} ${D2CS_PORT} ${DDDD} ${EXTIP}
 }
@@ -369,7 +380,7 @@ D2CS_PORT=$5    # d2cs  binding at 6113 different version of d2 could use differ
 CCCC=${IP}    # d2dbs binding at 6114
 D2DBS_PORT=6114    # d2cs  binding at 6113 different version of d2 could use different port to serve. Such as 1.09 use  6109, 
 DDDD=${IP}    # d2gs  binding at 4000, this port can not change.
-VERSION=$6
+# VERSION=$6
 
 
 echo '------'
@@ -457,7 +468,7 @@ echo '------'
 
 #wine regedit /home/d2gs/d2gs.reg
 
-#Setup_d2gs ${BBBB} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
+#Setup_d2gs ${BBBB} ${D2CS_PORT} ${CCCC} '9e75a42100e1b9e0b5d3873045084fae699adcb0' $VERSION
 
 ## -----
 #D2DBSConsole.exe          分配内网IP 10.88.0.19 (c.c.c.c) : 6114
@@ -520,13 +531,21 @@ case "${ACT}" in
         # Dispaly_Selection
         case "${TASK}" in
             pvpgn)
+                VERSION=$6
                 Setup_Pvpgn
             ;;
             d2cs)
+                DDDD=$3
                 Setup_d2cs '/home/pvpgn'_$REALM_NAME $REALM_NAME ${DDDD} ${D2CS_PORT} ${AAAA}
             ;;
             d2dbs)
-                Setup_d2cs '/home/pvpgn' $REALM_NAME ${DDDD} ${D2CS_PORT} ${AAAA}
+                DDDD=$3
+                Setup_d2dbs '/home/pvpgn' $REALM_NAME ${DDDD} ${D2CS_PORT} ${AAAA}
+            ;;
+            address_translation)
+                EXTIP=$3
+                Setup_address_translation '/home/pvpgn' ${BBBB} ${EXTIP} ${D2CS_PORT} ${DDDD} ${EXTIP}
+                # Setup_address_translation '/home/pvpgn' ${BBBB} ${EXTIP} ${D2CS_PORT} ${DDDD} ${EXTIP}
             ;;
             # d2cs)
             #     Setup_D2cs
@@ -541,7 +560,12 @@ case "${ACT}" in
                 Start_Pvpgn '/home/pvpgn'
             ;;
             d2cs)
-                Start_d2cs '/home/pvpgn'
+                if [ "$3" = "" ]; then
+                    Start_d2cs '/home/pvpgn'
+                else
+                    REALM_NAME=$3
+                    Start_d2cs '/home/pvpgn_'$REALM_NAME
+                fi
             ;;
             d2dbs)
                 Start_d2dbs '/home/pvpgn'
@@ -575,7 +599,7 @@ case "${ACT}" in
         VERSION=$4
         EXTIP=$5
         echo 'realm '$REALM_NAME' '$REALM_PORT' '$AAAA
-        Add_realm $REALM_NAME $REALM_PORT $AAAA
+        Add_realm $REALM_NAME $REALM_PORT $AAAA $VERSION
         # Add_d2gs $BBBB $CCCC $VERSION
         # LAMP_Stack 2>&1 | tee /root/add-d2gs.log
         ;;
@@ -583,13 +607,14 @@ case "${ACT}" in
         # Dispaly_Selection
         # REALM_NAME=$2
         BBBB=$2
-        CCCC=$3
+        REALM_PORT=$3
+        CCCC=$4
         # DDDD=$5
         # EXTIP=$6
-        VERSION=$4
+        VERSION=$5
         #  d2gs $REALM_NAME $BBBB $CCCC $DDDD $EXTIP $D2Select
         # Add_realm
-        Add_d2gs $BBBB $CCCC $VERSION
+        Add_d2gs $BBBB $REALM_PORT $CCCC $VERSION
         # LAMP_Stack 2>&1 | tee /root/add-d2gs.log
         ;;
     delete)

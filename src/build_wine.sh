@@ -44,18 +44,18 @@ WINEPREFIX=~/.wine WINEARCH="win32" wine winecfg
 # wget -qO diablo2_bnet.7z "http://10.0.0.10/diablo2_bnet.7z"
 # 7za x -y diablo2_bnet.7z
 
-cd /home
-rm /home/pvpgn -rf
-rm /home/d2gs -rf
+# cd /home
+# rm /home/pvpgn -rf
+# rm /home/d2gs -rf
 # mkdir -p /home/pvpgn
 
-wget -q https://github.com/wqmeng/pvpgner/raw/main/pvpgn/pvpgn1.99.8.0.0-rc1-PRO.7z
-7za x -y pvpgn1.99.8.0.0-rc1-PRO.7z
-mv pvpgn1.99.8.0.0-rc1-PRO pvpgn
-rm pvpgn1.99.8.0.0-rc1-PRO* -rf
+# wget -q https://github.com/wqmeng/pvpgner/raw/main/pvpgn/pvpgn1.99.8.0.0-rc1-PRO.7z
+# 7za x -y pvpgn1.99.8.0.0-rc1-PRO.7z
+# mv pvpgn1.99.8.0.0-rc1-PRO pvpgn
+# rm pvpgn1.99.8.0.0-rc1-PRO* -rf
 #rm pvpgn1.99.8.0.0-rc1-PRO.7z -rf
 
-cd /home/pvpgn
-wget -q https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/config_pvpgn.sh
-chmod +x config_pvpgn.sh
+# cd /home/pvpgn
+# wget -q https://raw.githubusercontent.com/wqmeng/pvpgner/main/src/config_pvpgn.sh
+# chmod +x config_pvpgn.sh
 # change the conf files and reg files if needed
