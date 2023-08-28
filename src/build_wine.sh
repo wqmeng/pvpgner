@@ -12,6 +12,9 @@ dnf -yq install wget tmux gcc libX11-devel freetype-devel zlib-devel libxcb-deve
 dnf -yq groupinstall 'Development Tools'
 dnf -yq install --assumeyes epel-release
 dnf -yq install --assumeyes p7zip
+dnf -yq install jq
+wget -q https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+chmod +x /usr/bin/yq
 
 mkdir -p /home/src
 cd /home/src
