@@ -38,9 +38,7 @@ Echo_Blue()
 Dispaly_Selection()
 {
 
-#select install a new pvpgn or add realm or add gs
-    echo "==========================="
-
+    #select install a new pvpgn or add realm or add gs
     ACTSelect="1"
     Echo_Yellow "You have 3 options for your Diablo2 pvpgn install."
     echo "1: Install new pvpgn (default)"
@@ -84,9 +82,7 @@ Dispaly_Selection()
 
     if [[ "${ACTSelect}" = "1" ]]; then
 
-    #which MySQL Version do you want to install?
-        echo "==========================="
-
+        #which MySQL Version do you want to install?
         DBSelect="1"
         STORAGE='plain'
         Echo_Yellow "You have 6 options for your Database install."
@@ -144,8 +140,7 @@ Dispaly_Selection()
         fi
 
         if [[ "${DBSelect}" = "2" || "${DBSelect}" = "3" || "${DBSelect}" = "4" || "${DBSelect}" = "5" || "${DBSelect}" = "6" ]]; then
-        #set mysql root password
-
+            #set mysql root password
             DB_Root_Password="root"
             Echo_Yellow "Please setup root password of MySQL.(Default password: root)"
             read -p "Please enter: " DB_Root_Password
@@ -153,13 +148,10 @@ Dispaly_Selection()
                 DB_Root_Password="root"
             fi
             echo "MySQL root password: ${DB_Root_Password}"
-
         fi
 
         if [[ "${DBSelect}" = "3" || "${DBSelect}" = "4" ]]; then
-        #do you want to enable or disable the InnoDB Storage Engine?
-            echo "==========================="
-
+            #do you want to enable or disable the InnoDB Storage Engine?
             InstallInnodb="y"
             Echo_Yellow "Do you want to enable or disable the InnoDB Storage Engine?"
             read -p "Default enable,Enter your choice [Y/n]: " InstallInnodb
@@ -261,12 +253,6 @@ Dispaly_Selection()
 
     if  [[ "${ACTSelect}" = "1" || "${ACTSelect}" = "2" ]]; then
         #set realm name and port
-
-        # if [ "${ACTSelect}" = "2" ]; then
-        #     REALM_NAME="Realm_D2Version"
-        # else
-        #     REALM_NAME="Realm_D2Version"
-        # fi
         REALM_NAME="Realm_D2Version"
 
         Echo_Yellow "Please setup Realm name, default is: "$REALM_NAME
@@ -279,34 +265,25 @@ Dispaly_Selection()
         fi
 
         if [ "${ACTSelect}" = "2" ]; then
-        # add realm
+            # add realm
             USEDPORTS=$(netstat -ntl | grep 'tcp' | grep -v 'tcp6' | cut -d ':' -f2 | cut -d ' ' -f1)
-
             ARRPORTS=(`echo $USEDPORTS | tr -s ' ' ' '`)
-
             REALM_PORT=6113
             
             while [ $REALM_PORT -le 60000 ]
             do
                 REALM_PORT=$(expr $REALM_PORT + 100)
-
                 PORTUSED=false
-
                 for i in "${!ARRPORTS[@]}"; do
-                    # echo "$i: ${ARRPORTS[i]}"
                     if [ "$REALM_PORT" = "${ARRPORTS[i]}" ]; then 
                       PORTUSED=true
                       break
                     fi
                 done
-
                 if [ "$PORTUSED" = false ]; then                
                   break
                 fi
             done
-
-            # echo $REALM_PORT
-
         else
             REALM_PORT="6113"
         fi
@@ -316,15 +293,9 @@ Dispaly_Selection()
         if [[ "${READ_REALM_PORT}" != "" ]]; then
             REALM_PORT=${READ_REALM_PORT}
         fi
-        # if [ "${REALM_NAME}" = "Realm_D2Version" ]; then
-        #     REALM_NAME="Realm_"${REALM_PORT}
-        # fi
         echo "Your Realm port: ${REALM_PORT}"
-        # echo "Your Realm name: ${REALM_NAME}"
 
         #which D2 Version do you want to install?
-        echo "==========================="
-
         D2Select="2"
         Echo_Yellow "You have 4 options for your Diablo2 GS install."
         echo "1: Install Diablo2 1.13d"
@@ -352,12 +323,6 @@ Dispaly_Selection()
             echo "You will install Diablo2 GS 1.09d"
             D2Select=1.09d
             ;;
-        # 5)
-        #     echo "You will install PHP 5.6.20"
-        #     ;;
-        # 6)
-        #     echo "You will install PHP 7.0.5"
-        #     ;;
         *)
             echo "No input,You will install Diablo2 1.13c"
             D2Select=1.13c
@@ -386,10 +351,6 @@ Dispaly_Selection()
         ARR_ALL_EXTIPS=(`echo $ALL_EXTIPS | tr -s ' ' ' '`)
         for i in "${!ARR_ALL_EXTIPS[@]}"; do
             echo "$i: ${ARR_ALL_EXTIPS[i]}"
-            # if [ "${ARR_ALL_EXTIPS[i]}" = "${ARR_ALL_USEDIPS[j]}" ]; then 
-            #     IPUSED=true
-            #     break
-            # fi
         done
 
         Echo_Yellow "Please select Output IP, default is: 0 ("${ARR_ALL_EXTIPS[0]}")"
@@ -414,10 +375,8 @@ Dispaly_Selection()
         ARR_ALL_USEDIPS=(`echo $ALL_USEDIPS | tr -s ' ' ' '`)
         ARR_AV_IPS=()
         for i in "${!ARR_ALL_EXTIPS[@]}"; do
-            # echo "i: $i: ${ARR_ALL_EXTIPS[i]}"
             IPUSED=false
             for j in "${!ARR_ALL_USEDIPS[@]}"; do
-                # echo "j: $j: ${ARR_ALL_USEDIPS[j]}"
                 if [ "${ARR_ALL_EXTIPS[i]}" = "${ARR_ALL_USEDIPS[j]}" ]; then 
                     IPUSED=true
                     break
@@ -425,17 +384,13 @@ Dispaly_Selection()
             done
 
             if [ "${IPUSED}" = false ]; then
-                # DDDD=${ARR_ALL_EXTIPS[i]}
-                # break
                 ARR_AV_IPS+=("${ARR_ALL_EXTIPS[i]}")
             fi
         done
 
         SELECT_D2GS_IPS=""
         for j in "${!ARR_AV_IPS[@]}"; do            
-            # if [[ "$j" -ge "$i" ]]; then 
             echo "$j: ${ARR_AV_IPS[j]}"
-
             if [ "$j" -lt $((${#ARR_AV_IPS[@]} - 1)) ]; then
                 if [ "$j" = $((${#ARR_AV_IPS[@]} - 2)) ]; then
                   SELECT_D2GS_IPS=${SELECT_D2GS_IPS}$j' or '
@@ -445,21 +400,15 @@ Dispaly_Selection()
             else 
               SELECT_D2GS_IPS=${SELECT_D2GS_IPS}$j
             fi
-
-            # fi
         done
-
         DDDD=${ARR_AV_IPS[0]} 
 
-        # echo $EXTIP
         Echo_Yellow "Please select D2GS Output IP, default is 0, IP: $DDDD"
         read -p "Enter your choice ($SELECT_D2GS_IPS): " READ_EXTIP
         if [ "${READ_EXTIP}" != "" ]; then
             DDDD=${ARR_AV_IPS[${READ_EXTIP}]}
             if [ "${DDDD}" != "" ]; then 
                 echo "You select: "${READ_EXTIP}", IP: "$DDDD
-            # else
-            #     EXTIP=$(ip a | grep -v 'inet6' | grep 'inet' | grep -v 'host lo' | cut -d'/' -f1 | grep -o '[0-9].*' | grep -v '10.88' | sed -n '1p')
             fi
         fi
         REALM_OUTIP=$EXTIP
@@ -467,14 +416,6 @@ Dispaly_Selection()
         echo "Your pvpgn IP: ${EXTIP}"
         echo "Your D2GS IP: ${DDDD}"
     fi
-
-    # 
-    # str="ONE,TWO,THREE,FOUR"
-    # array=(`echo $str | tr -s ',' ' '`)
-    # for i in "${!array[@]}"; do
-    #     echo "$i：${array[i]}"
-    # done
-
 }
 
 Print_Sucess_Info()
@@ -501,8 +442,9 @@ Print_Sucess_Info()
     echo "+------------------------------------------------------------------------+"
     echo "|  MySQL/MariaDB root password: ${DB_Root_Password}                      |"
     echo "+------------------------------------------------------------------------+"
-    pvngn status
+    # pvngn status
     netstat -ntl
+    firewall-cmd --list-all | grep 'ports: ' | grep '6112'
     Echo_Green "Install pvpgn ${EXTIP} completed! enjoy it."
 }
 
@@ -517,14 +459,7 @@ fi
 
 cur_dir=$(pwd)
 PVPGN_YAML=/home/pvpgn/pvpgn.yaml
-AdminPwd="9e75a42100e1b9e0b5d3873045084fae699adcb0"
-
-# stack=$1
-# if [ "${stack}" = "" ]; then
-#     stack=""
-# else
-#     stack=$1
-# fi
+AdminPwd="9e75a42100e1b9e0b5d3873045084fae699adcb0" #abcd123
 
 clear
 echo "+------------------------------------------------------------------------+"
@@ -536,32 +471,24 @@ echo "|   For more information please visit https://github.com/wqmeng/pvpgner  |
 echo "+------------------------------------------------------------------------+"
 
 # If we have a argument, then we do not select.
-
 case "$1" in
     pvpgn)
-        # Dispaly_Selection
         ACT="pvpgn"
         DBSelect=$2
         D2Select=$4
-        # LNMP_Stack 2>&1 | tee /root/pvpgn-install.log
         ;;
     realm)
-        # Dispaly_Selection
         ACT="realm"
         REALM_NAME=$2
         DDDD=$3
         REALM_PORT=$4
         D2Select=$5
-        # LNMPA_Stack 2>&1 | tee /root/add-realm.log
         ;;
     d2gs)
-        # Dispaly_Selection
         ACT="d2gs"
         REALM_NAME=$2
-        # LAMP_Stack 2>&1 | tee /root/add-d2gs.log
         ;;
     help|-h|-help)
-        # Dispaly_Selection
         Echo_Red "Usage: $0 {pvpgn|realm|d2gs}"
         echo "Storage: plain cdb mysql mariaDB pgsql sqlite3"
         echo "Diablo2: 1.13d 1.13c 1.11b 1.09d"
@@ -571,36 +498,26 @@ case "$1" in
         ;;
     *)
         Dispaly_Selection
-        # Echo_Red "Usage: $0 {pvpgn|realm|d2gs}"
         ;;
 esac
 
 case "${ACT}" in
     pvpgn)
-        # Dispaly_Selection
-        echo "Pvpgn install is starting ..."
+        echo "Pvpgn installation is starting ..."
         dnf -yq clean all
+        dnf -yq install --assumeyes epel-release
         dnf -yq update
         dnf -yq install wget tmux podman
-        dnf -yq install --assumeyes epel-release
         dnf -yq install --assumeyes p7zip
-        # dnf -yq install npm
-        # npm install composerize
-        # dnf -yq install shyaml
         wget -q https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
         chmod +x /usr/bin/yq
-        ln -s /usr/bin/yq /usr/local/bin/yq
-        # yq e '.b.e[0].name="aaa"' -i yq.yaml
-        # dnf -yq install jq
-        # dnf -yq install python-pip
-        # pip -q install yq
         touch /etc/containers/nodocker
         systemctl enable --now podman
         mkdir -p /home/pvpgn/
 
-        if [ ! -f "/home/d2gs_base/d2data.mpq" ]; then
-            mkdir -p /home/d2gs_base
-            cd /home/d2gs_base
+        if [ ! -f "/home/D2GS_BASE/d2data.mpq" ]; then
+            mkdir -p /home/D2GS_BASE
+            cd /home/D2GS_BASE
             wget -q https://ia801809.us.archive.org/29/items/d2gs-base.-7z/D2GS_Base.7z
             7za x -y D2GS_Base.7z >/dev/null 2>&1
             mv D2GS_Base/* .
@@ -628,15 +545,12 @@ case "${ACT}" in
         cd /home
         wget -q https://github.com/wqmeng/pvpgner/raw/main/pvpgn/pvpgn1.99.8.0.0-rc1-PRO.7z
         7za x -y pvpgn1.99.8.0.0-rc1-PRO.7z >/dev/null 2>&1
-        # mv -n /home/pvpgn1.99.8.0.0-rc1-PRO/* /home/pvpgn_$STRDATE
-        # \cp -nr /home/pvpgn1.99.8.0.0-rc1-PRO/* /home/pvpgn_$STRDATE
         \cp -rn /home/pvpgn1.99.8.0.0-rc1-PRO/var /home/pvpgn_$STRDATE
         \cp -rn /home/pvpgn1.99.8.0.0-rc1-PRO/conf /home/pvpgn_$STRDATE
         rm pvpgn1.99.8.0.0-rc1-PRO* -rf
 
-        docker run -dt --privileged=true -v /home/pvpgn_$STRDATE/conf:/home/pvpgn_$STRDATE/conf -v /home/pvpgn_$STRDATE/var:/home/pvpgn_$STRDATE/var -v /home/d2gs_$STRDATE:/home/d2gs -v /home/pvpgn:/home/pvpgn -v /home/d2gs_base:/home/d2gs_base --name pvpgn -p $EXTIP:6112:6112 -p $EXTIP:6112:6112/udp -p $EXTIP:$REALM_PORT:$REALM_PORT -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
+        docker run -dt --privileged=true -v /home/pvpgn_$STRDATE/conf:/home/pvpgn_$STRDATE/conf -v /home/pvpgn_$STRDATE/var:/home/pvpgn_$STRDATE/var -v /home/d2gs_$STRDATE:/home/d2gs -v /home/pvpgn:/home/pvpgn -v /home/D2GS_BASE:/home/D2GS_BASE --name pvpgn -p $EXTIP:6112:6112 -p $EXTIP:6112:6112/udp -p $EXTIP:$REALM_PORT:$REALM_PORT -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
         CID=$(docker ps -a | grep pvpgn | grep -v 'pvpgn-' | cut -d ' ' -f 1)
-
         # create a yaml conf file.
         # PVPGN
         rm -rf ${PVPGN_YAML}
@@ -650,70 +564,33 @@ case "${ACT}" in
 
         #  Realm
         REALM_DESC="$REALM_NAME for $D2Select"
-        # yq e -i '.pvpgn.realms += [{"cid":"'$CID'","name":"'$REALM_NAME'","desc":'$REALM_DESC',"port":6113,"version":"'$D2Select'"}]' ${PVPGN_YAML}
         yq e -i '.pvpgn.realms += [{"cid":"'$CID'","name":"'$REALM_NAME'","desc":"'"$REALM_DESC"'","port":'$REALM_PORT',"version":"'$D2Select'","path":"'$STRDATE'"}]' ${PVPGN_YAML}
-
-        # echo "  realm:" >> ${PVPGN_YAML}
-        # echo "    -" >> ${PVPGN_YAML}
-        # echo "      cid: $CID" >> ${PVPGN_YAML}
-        # echo "      name: $REALM_NAME" >> ${PVPGN_YAML}
-        # echo "      desc: $REALM_NAME for $D2Select" >> ${PVPGN_YAML}
-        # echo "      port: 6113" >> ${PVPGN_YAML}
-        # echo "      version: $D2Select" >> ${PVPGN_YAML}
 
         #  d2gs
         yq e -i '.pvpgn.realms[] |= select(.name == "'$REALM_NAME'").d2gs += [{"cid":"'$CID'","innerIP":"'$PVPBN_INNERIP'","outIP":"'$EXTIP'","port":4000,"d2csIP":"'$PVPBN_INNERIP'","d2dbsIP":"'$PVPBN_INNERIP'","path":"'$STRDATE'","AdminPwd":"'$AdminPwd'"}]' /home/pvpgn/pvpgn.yaml
-        # yq e -i '.pvpgn.d2gs = [{"cid":"'$CID'","innerIP":"'$PVPBN_INNERIP'","outIP":"'$EXTIP'","port":4000,"path":"'$STRDATE'"}]' ${PVPGN_YAML}
-        # yq e -i '.pvpgn.d2gs[0].realms += [{"name":"'$REALM_NAME'","d2csIP":"'$PVPBN_INNERIP'","d2dbsIP":"'$PVPBN_INNERIP'","path":"'$STRDATE'"}]' ${PVPGN_YAML}
-        # yq e -i '.pvpgn.d2gs[] |= select(.cid == "'$CID'") |= .realms += [{"name":"'$REALM_NAME'","d2csIP":"'$PVPBN_INNERIP'","d2dbsIP":"'$PVPBN_INNERIP'"}]' ${PVPGN_YAML}
 
-        # echo "  d2gs:" >> ${PVPGN_YAML}
-        # echo "    cid: $CID" >> ${PVPGN_YAML}
-        # echo "    innerIP: $PVPBN_INNERIP" >> ${PVPGN_YAML}
-        # echo "    IP: $PVPBN_INNERIP" >> ${PVPGN_YAML}
-        # echo "    realm:" >> ${PVPGN_YAML}
-        # echo "      -" >> ${PVPGN_YAML}
-        # echo "        name: $REALM_NAME" >> ${PVPGN_YAML}
-
-        # 登录容器修改配置
-        # Start pvpgn
+        # update config_pvpgn.sh
         docker exec -it pvpgn rm -rf /home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn wget -q ${PVPGN_URI}config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn chmod +x /home/pvpgn/config_pvpgn.sh
+
         Echo_Red "docker pvpgn setup pvpgn"
         docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup pvpgn $EXTIP $REALM_NAME $REALM_PORT $D2Select
         Echo_Red "docker pvpgn start pvpgn"
         docker exec -it -w /home/pvpgn pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh start $REALM_NAME
 
         # Start D2GS
-        # docker exec -it pvpgn pkill -f 'D2GS'
-        # docker exec -d -w /home/d2gs pvpgn wine D2GS.exe # Not sure why D2GS.exe can not start up and running as PvPGNConsole from config_pvpgn.sh start command. 
-        # docker exec -it pvpgn tmux new -s pvpgn /home/pvpgn/config_pvpgn.sh start
-
-        # LNMP_Stack 2>&1 | tee /root/pvpgn-install.log
-
         firewall-cmd --permanent --zone=public --add-port=6112/tcp
         firewall-cmd --permanent --zone=public --add-port=6112/udp
         firewall-cmd --permanent --zone=public --add-port=$REALM_PORT/tcp
-        firewall-cmd --permanent --zone=public --add-port=6114/tcp
-
+        # firewall-cmd --permanent --zone=public --add-port=6114/tcp
         firewall-cmd --permanent --zone=public --add-port=4000/tcp
-
         firewall-cmd --reload
-        # firewall-cmd --query-port=6112/tcp
-
         firewall-cmd --list-all
-        # firewall-cmd --list-all-zones
         ;;
     realm)
         # Add realm to pvpgn
-        # docker run -dt --name pvpgn -p $DDDD:$REALM_PORT:$REALM_PORT wqmeng:pvpgn /bin/bash
-
         echo 'Add realm to pvpgn'
-
-        # CID=$(docker ps -a | grep pvpgn | cut -d ' ' -f 1)
-        # read all realm ports from yaml
-        # yq '.pvpgn.realms[].port' ${PVPGN_YAML}
         ALL_REALM_PORTS=$(yq '.pvpgn.realms[].port' ${PVPGN_YAML})
         ALL_REALM_PATHS=$(yq '.pvpgn.realms[].path' ${PVPGN_YAML})
         ARRREALM_PORTS=(`echo $ALL_REALM_PORTS | tr -s ' ' ' '`)
@@ -722,20 +599,17 @@ case "${ACT}" in
         P_PORTS="";
         V_PATHS="";
         for i in "${!ARRREALM_PORTS[@]}"; do
-            # echo "$i: ${ARRPORTS[i]}"
             if [[ "$P_PORTS" != *":${ARRREALM_PORTS[i]}:"* ]]; then 
                 P_PORTS=${P_PORTS}'-p '${EXTIP}':'${ARRREALM_PORTS[i]}':'${ARRREALM_PORTS[i]}' '
                 V_PATHS=${V_PATHS}'-v /home/pvpgn_'${ARRREALM_PATHS[i]}/conf':/home/pvpgn_'${ARRREALM_PATHS[i]}/conf' ''-v /home/pvpgn_'${ARRREALM_PATHS[i]}/var':/home/pvpgn_'${ARRREALM_PATHS[i]}/var' '
             fi            
         done
-
         CID=$(docker ps -a | grep pvpgn | grep -v 'pvpgn-' | cut -d ' ' -f 1)
         PVPBN_INNERIP=$(docker inspect pvpgn | grep IPAddress | sed -n '1p' | cut -d '"' -f 4)
         if [ "$CID" != "" ]; then 
             docker stop -i $CID >/dev/null 2>&1
             docker rm -fi $CID >/dev/null 2>&1
         fi
-
         STRDATE=$(date +%y%m%d_%H%M%S)
         mkdir /home/pvpgn_$STRDATE
         mkdir /home/d2gs_$STRDATE
@@ -743,15 +617,11 @@ case "${ACT}" in
         cd /home
         wget -q https://github.com/wqmeng/pvpgner/raw/main/pvpgn/pvpgn1.99.8.0.0-rc1-PRO.7z
         7za x -y pvpgn1.99.8.0.0-rc1-PRO.7z >/dev/null 2>&1
-        # mv -n /home/pvpgn1.99.8.0.0-rc1-PRO/* /home/pvpgn_$STRDATE
-        # \cp -nr /home/pvpgn1.99.8.0.0-rc1-PRO/* /home/pvpgn_$STRDATE
         \cp -rn /home/pvpgn1.99.8.0.0-rc1-PRO/var /home/pvpgn_$STRDATE
         \cp -rn /home/pvpgn1.99.8.0.0-rc1-PRO/conf /home/pvpgn_$STRDATE
         rm pvpgn1.99.8.0.0-rc1-PRO* -rf
 
-        # echo run -dt --privileged=true $V_PATHS -v /home/pvpgn_$STRDATE/conf:/home/pvpgn_$STRDATE/conf -v /home/pvpgn_$STRDATE/var:/home/pvpgn_$STRDATE/var -v /home/pvpgn:/home/pvpgn -v /home/d2gs_base:/home/d2gs_base --name pvpgn -p $EXTIP:6112:6112 -p $EXTIP:6112:6112/udp $P_PORTS -p $EXTIP:$REALM_PORT:$REALM_PORT -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
-
-        docker run -dt --privileged=true $V_PATHS -v /home/pvpgn_$STRDATE/conf:/home/pvpgn_$STRDATE/conf -v /home/pvpgn_$STRDATE/var:/home/pvpgn_$STRDATE/var -v /home/pvpgn:/home/pvpgn -v /home/d2gs_$D2GS_PATH:/home/d2gs -v /home/d2gs_base:/home/d2gs_base --name pvpgn -p $EXTIP:6112:6112 -p $EXTIP:6112:6112/udp $P_PORTS -p $EXTIP:$REALM_PORT:$REALM_PORT -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
+        docker run -dt --privileged=true $V_PATHS -v /home/pvpgn_$STRDATE/conf:/home/pvpgn_$STRDATE/conf -v /home/pvpgn_$STRDATE/var:/home/pvpgn_$STRDATE/var -v /home/pvpgn:/home/pvpgn -v /home/d2gs_$D2GS_PATH:/home/d2gs -v /home/D2GS_BASE:/home/D2GS_BASE --name pvpgn -p $EXTIP:6112:6112 -p $EXTIP:6112:6112/udp $P_PORTS -p $EXTIP:$REALM_PORT:$REALM_PORT -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
         OLDCID=$CID
         CID=$(docker ps -a | grep pvpgn | grep -v 'pvpgn-' | cut -d ' ' -f 1)
         OLDPVPBN_INNERIP=$PVPBN_INNERIP
@@ -769,45 +639,18 @@ case "${ACT}" in
         docker exec -it pvpgn wget -q ${PVPGN_URI}config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn chmod +x /home/pvpgn/config_pvpgn.sh
 
-        Echo_Red "docker pvpgn realm"
-        # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh realm $REALM_NAME ${REALM_PORT} $D2Select $DDDD
-        
+        Echo_Red "docker pvpgn realm"     
         # Create a new d2gs container for the new realm and point the 4000 port.
-        echo "create container EXTIP: "$EXTIP
-        echo "create d2gs container: "$REALM_NAME" "$EXTIP" "$REALM_PORT" "$REALM_OUTIP
+        docker run -dt --privileged=true -v /home/pvpgn:/home/pvpgn -v /home/d2gs_$STRDATE:/home/d2gs -v /home/D2GS_BASE:/home/D2GS_BASE --name pvpgn-$REALM_NAME -p $D2GS_OUTIP:4000:4000 wqmeng:pvpgn /bin/bash
 
-        # docker run -dt --privileged=true -v /home/pvpgn_$STRDATE:/home/pvpgn_$STRDATE -v /home/pvpgn:/home/pvpgn -v /home/d2gs_$STRDATE:/home/d2gs -v /home/d2gs_base:/home/d2gs_base --name pvpgn-$REALM_NAME -p $D2GS_OUTIP:4000:4000 wqmeng:pvpgn /bin/bash
-        docker run -dt --privileged=true -v /home/pvpgn:/home/pvpgn -v /home/d2gs_$STRDATE:/home/d2gs -v /home/d2gs_base:/home/d2gs_base --name pvpgn-$REALM_NAME -p $D2GS_OUTIP:4000:4000 wqmeng:pvpgn /bin/bash
         docker exec -it pvpgn-$REALM_NAME rm -rf /home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn-$REALM_NAME wget -q ${PVPGN_URI}config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn-$REALM_NAME chmod +x /home/pvpgn/config_pvpgn.sh        
-        # 登录容器修改配置
-        #  Realm
-        # CID=$(docker ps -a | grep pvpgn | cut -d ' ' -f 1)
 
-        # Create a new container, and run d2gs for the new realm.
-
-        # Setup_d2cs '/home/pvpgn' $REALM_NAME ${DDDD} ${D2CS_PORT} ${AAAA}
-        # Setup_d2dbs '/home/pvpgn' ${DDDD}
-        # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2cs $EXTIP $REALM_NAME ${REALM_PORT} $D2Select
         D2GS_INNERIP=$(docker inspect pvpgn-$REALM_NAME | grep IPAddress | sed -n '1p' | cut -d '"' -f 4)
-
         CID=$(docker ps -a | grep pvpgn | grep -v 'pvpgn-' | cut -d ' ' -f 1)
         REALM_DESC="$REALM_NAME for $D2Select"
-        # echo $REALM_DESC
-        # echo ${PVPGN_YAML}
-        # yq e -i '.pvpgn.realms += [{"cid":"'$CID'","name":"'$REALM_NAME'","desc":"'"$REALM_DESC"'","port":6113,"version":"'$D2Select'"}]' ${PVPGN_YAML}
         yq e -i '.pvpgn.realms += [{"cid":"'$CID'","name":"'$REALM_NAME'","desc":"'"$REALM_DESC"'","port":'$REALM_PORT',"version":"'$D2Select'","path":"'$STRDATE'"}]' ${PVPGN_YAML}
-        # yq e -i '.pvpgn.realms += [{"cid":"0f2720cc70bd","name":"Realm_6313","desc":"Realm_6313 for 1.13c","port":"6313","version":"1.13c"}]' ${PVPGN_YAML}
-        # echo ${PVPGN_YAML}
-
-        # echo "  realm:" >> ${PVPGN_YAML}
-        # echo "    -" >> ${PVPGN_YAML}
-        # echo "      cid: $CID" >> ${PVPGN_YAML}
-        # echo "      name: $REALM_NAME" >> ${PVPGN_YAML}
-        # echo "      desc: $REALM_NAME for $D2Select" >> ${PVPGN_YAML}
-        # echo "      port: 6113" >> ${PVPGN_YAML}
-        # echo "      version: $D2Select" >> ${PVPGN_YAML}
 
         #  d2gs
         CID=$(docker ps -a | grep pvpgn-$REALM_NAME | cut -d ' ' -f 1)
@@ -824,62 +667,9 @@ case "${ACT}" in
 
         firewall-cmd --permanent --zone=public --add-port=$REALM_PORT/tcp
         firewall-cmd --reload
-        # firewall-cmd --query-port=6112/tcp
-
-        firewall-cmd --list-all
-        # firewall-cmd --permanent --zone=public --add-port=4000/tcp
-
-        # yq e -i '.pvpgn.d2gs += [{"cid":"'$CID'","innerIP":"'$D2GS_INNERIP'","outIP":"'$D2GS_OUTIP'","port":4000,"path":"'$STRDATE'"}]' ${PVPGN_YAML}
-        # yq e -i '.pvpgn.d2gs[] |= select(.cid == "'$CID'") |= .realms += [{"name":"'$REALM_NAME'","d2csIP":"'$PVPBN_INNERIP'","d2dbsIP":"'$PVPBN_INNERIP'","path":"'$STRDATE'"}]' ${PVPGN_YAML}
-
-        # Echo_Red "docker pvpgn setup d2cs"
-        # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2cs $D2GS_INNERIP $REALM_NAME ${REALM_PORT} $D2Select
-        # Echo_Red "docker pvpgn setup d2dbs"
-        # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2dbs $D2GS_INNERIP $REALM_NAME 6114 $D2Select
-
-        # Echo_Red "docker pvpgn setup address_translation"
-        # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup address_translation $PVPBN_INNERIP $REALM_OUTIP ${REALM_PORT} $D2GS_INNERIP $D2GS_OUTIP
-
-        # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $BBBB $REALM_PORT $CCCC $D2Select
-
-        # # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh start d2cs pvpgn_$REALM_NAME
-        # # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh start pvpgn $REALM_NAME
-        # Echo_Red "docker pvpgn start"
-        # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh start
-
-        # Echo_Red "docker pvpgn start d2cs"
-        # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh start d2cs $REALM_NAME
-        # # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh start d2cs $REALM_NAME
-
-        # BBBB=$PVPBN_INNERIP
-        # CCCC=$PVPBN_INNERIP
-        # # DDDD=$EXTIP
-        # # docker exec -it pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $REALM_NAME $BBBB $CCCC $DDDD $EXTIP $D2Select
-        # docker exec -it pvpgn-$REALM_NAME rm -rf /home/pvpgn/config_pvpgn.sh
-        # docker exec -it pvpgn-$REALM_NAME wget -q ${PVPGN_URI}config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
-        # docker exec -it pvpgn-$REALM_NAME chmod +x /home/pvpgn/config_pvpgn.sh
-
-        # # echo $D2Select
-
-        # # echo "BBBB cs: $BBBB REALM_PORT: $REALM_PORT CCCC dbs: $CCCC version: VERSION"
-        # # echo "${REALM_PORT}" | awk '{printf "%08x\n",$0}'
-
-        # Echo_Red "docker pvpgn-$REALM_NAME d2gs"
-        # docker exec -it pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $BBBB $REALM_PORT $CCCC $D2Select
-
-        # Echo_Red "docker pvpgn-$REALM_NAME start d2gs"
-        # docker exec -it -w /home/d2gs pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh start d2gs
-
-        # # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh setup d2dbs $EXTIP $REALM_NAME 6114 $D2Select
-        # # docker exec -it pvpgn /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $D2Select
-
-        # # LNMPA_Stack 2>&1 | tee /root/add-realm.log
-
-
         ;;
     d2gs)
-        # Dispaly_Selection
-        docker run -dt --privileged=true -v /home/d2gs_base:/home/d2gs_base --name pvpgn-$REALM_NAME -p $DDDD:$REALM_PORT:$REALM_PORT -p $DDDD:4000:4000 wqmeng:pvpgn /bin/bash
+        docker run -dt --privileged=true -v /home/D2GS_BASE:/home/D2GS_BASE --name pvpgn-$REALM_NAME -p $DDDD:$REALM_PORT:$REALM_PORT -p $DDDD:4000:4000 wqmeng:pvpgn /bin/bash
 
         REALM_INNERIP=$(docker inspect pvpgn-$REALM_NAME | grep IPAddress | sed -n '1p' | cut -d '"' -f 4)
         
@@ -893,10 +683,8 @@ case "${ACT}" in
         docker exec -it pvpgn-$REALM_NAME wget -q ${PVPGN_URI}config_pvpgn.sh -O/home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn-$REALM_NAME chmod +x /home/pvpgn/config_pvpgn.sh
         docker exec -it pvpgn-$REALM_NAME /bin/bash /home/pvpgn/config_pvpgn.sh d2gs $D2Select
-        # LAMP_Stack 2>&1 | tee /root/add-d2gs.log
         ;;
     help|-h|-help)
-        # Dispaly_Selection
         Echo_Red "Usage: $0 {pvpgn|realm|d2gs}"
         echo "Storage: plain cdb mysql mariaDB pgsql sqlite3"
         echo "Diablo2: 1.13d 1.13c 1.11b 1.09d"
@@ -906,7 +694,6 @@ case "${ACT}" in
         ;;
     *)
         Dispaly_Selection
-        # Echo_Red "Usage: $0 {pvpgn|realm|d2gs}"
         ;;
 esac
 
