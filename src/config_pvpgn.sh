@@ -17,8 +17,9 @@
 # 4 玩家角色无法创建房间或者等待创建房间排队,  检查 服务器 4000 端口是否开放,  d2gs 是否顺利启动 通信和服务.  d2gs设置的最大房间数是否大于 0.
 
 ReadYaml() {
-    readarray ARRREALMS < <(yq e -o=j -I=0 '.pvpgn.realms[] | select(.cid == "'$HOSTNAME'")' /home/pvpgn/pvpgn.yaml)
-    readarray ARRD2GSS < <(yq e -o=j -I=0 '.pvpgn.d2gs[]' /home/pvpgn/pvpgn.yaml)
+    # readarray ARRREALMS < <(yq e -o=j -I=0 '.pvpgn.realms[] | select(.cid == "'$HOSTNAME'")' /home/pvpgn/pvpgn.yaml)
+    readarray ARRREALMS < <(yq e -o=j -I=0 '.pvpgn.realms[]' /home/pvpgn/pvpgn.yaml)
+    readarray ARRD2GSS < <(yq e -o=j -I=0 '.pvpgn.realms[].d2gs[]' /home/pvpgn/pvpgn.yaml)
     PVPGN_PATH=/home/pvpgn_$(yq e '.pvpgn.path' /home/pvpgn/pvpgn.yaml)/
     # REALM_PATH=/home/pvpgn_$(yq e '.pvpgn.realms[] | select(.name == "'$REALM_NAME'").path' /home/pvpgn/pvpgn.yaml)/
     # D2GS_PATH=/home/pvpgn_$(yq e '.pvpgn.d2gs[] | select(.cid == "'$HOSTNAME'").path' /home/pvpgn/pvpgn.yaml)
@@ -60,9 +61,9 @@ Setup_realm() {
         CID=$(echo "$realm" | yq e '.cid' -)
         echo "CID: $CID"
         D2CS_PORT=$(echo "$realm" | yq e '.port' -)
-        echo "PORT: $port"
+        echo "Setup_realm PORT: $D2CS_PORT"
         REALM_NAME=$(echo "$realm" | yq e '.name' -)
-        echo "PORT: $name"
+        echo "REALM_NAME: $REALM_NAME"
         REALM_DES=$(echo "$realm" | yq e '.desc' -)
         # path=$(echo "$realm" | yq e '.path' -)
         # echo "PORT: $path"
@@ -70,12 +71,12 @@ Setup_realm() {
         echo "Setup_d2dbs REALM_PATH: $REALM_PATH"
         D2GS_IP=$(yq e '.pvpgn.d2gs[].realms[] | select(.name == "'$REALM_NAME'").d2csIP' /home/pvpgn/pvpgn.yaml)
 
-        echo "Setup_realm PVPGN_PATH: $PVPGN_PATH"
+        echo "Setup_realm PVPGN_PATH: $REALM_PATH"
 
         cd /home
-        wget https://github.com/wqmeng/pvpgner/raw/main/pvpgn/pvpgn1.99.8.0.0-rc1-PRO.7z
+        wget -t 3 https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/pvpgn1.99.8.0.0-rc1-PRO.7z
         7za x -y pvpgn1.99.8.0.0-rc1-PRO.7z >/dev/null 2>&1
-        mv -n /home/pvpgn1.99.8.0.0-rc1-PRO/* $PVPGN_PATH/
+        mv -n /home/pvpgn1.99.8.0.0-rc1-PRO/* $REALM_PATH/
         rm pvpgn1.99.8.0.0-rc1-PRO* -rf
 
         sed -i '/^"'${REALM_NAME}'"/d' ${PVPGN_PATH}conf/realm.conf
@@ -105,24 +106,29 @@ Setup_d2cs() {
     D2CS_PORT=$4
     BNETD_IP=$5
     GSLIST=""
+    echo "--------------------"
+    echo "Setup_d2cs PVPGN_PATH: $PVPGN_PATH"
     for realm in "${ARRREALMS[@]}"; do
         # identity mapping is a yaml snippet representing a single entry
         CID=$(echo "$realm" | yq e '.cid' -)
         echo "CID: $CID"
         D2CS_PORT=$(echo "$realm" | yq e '.port' -)
-        echo "PORT: $port"
+        D2DBS_PORT=$(($D2CS_PORT + 1))
+        echo "Setup_d2cs PORT: $D2CS_PORT"
         REALM_NAME=$(echo "$realm" | yq e '.name' -)
-        echo "PORT: $name"
+        echo "name: $REALM_NAME"
         # path=$(echo "$realm" | yq e '.path' -)
         # echo "PORT: $path"
         REALM_PATH=/home/pvpgn_$(echo "$realm" | yq e '.path' -)/
-        echo "Setup_d2dbs REALM_PATH: $REALM_PATH"
-        D2GS_IP=$(yq e '.pvpgn.d2gs[].realm[] | select(.name == "'$REALM_NAME'").d2csIP' /home/pvpgn/pvpgn.yaml)
+        echo "Setup_d2cs REALM_PATH: $REALM_PATH"
+        D2GS_IP=$(echo "$realm" | yq e '.d2gs[].innerIP')
+        echo $D2GS_IP
+        GSLIST=$(echo $D2GS_IP | tr -s ' ' ',')
         sed -i '/^realmname/c realmname               =       "'${REALM_NAME}'"' ${REALM_PATH}conf/d2cs.conf
         #sed -i '/^servaddrs/c servaddrs            =       '${IP}':6113' /home/pvpgn/conf/d2cs.conf
         sed -i '/^servaddrs/c servaddrs            =       0.0.0.0:'${D2CS_PORT} ${REALM_PATH}conf/d2cs.conf
         #gameservlist            =       198.15.136.155 (d.d.d.d), 198.15.136.156 (d.d.d.d)-2
-        GSLIST="$GSLIST""$D2GS_IP"','
+        # GSLIST="$GSLIST""$D2GS_IP"','
         #sed -i '/^gameservlist/c gameservlist            =       198.15.136.155,198.15.136.156' ${CONF_PATH}conf/d2cs.conf
         # D2GSIPS=$(sed -n '/^gameservlist/p' ${REALM_PATH}conf/d2cs.conf | grep -Po '=\s*.*' | grep -Po '(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9]).*')
 
@@ -143,9 +149,9 @@ Setup_d2cs() {
         #sed -i '/^bnetdaddr/c bnetdaddr               =       198.15.136.155:6112' /home/pvpgn/conf/d2cs.conf
         sed -i '/^bnetdaddr/c bnetdaddr               =       '${BNETD_IP}':6112' ${REALM_PATH}conf/d2cs.conf
         #sed -n '/^bnetdaddr/p' /home/pvpgn/conf/d2cs.conf
+        sed -i '/^gameservlist/c gameservlist            =       '${GSLIST} ${REALM_PATH}conf/d2cs.conf
     done
 
-    sed -i '/^gameservlist/c gameservlist            =       '${GSLIST} ${REALM_PATH}conf/d2cs.conf
 
     # readarray realms < <(yq e -o=j -I=0 '.pvpgn.realms[] | select(.cid == "'$HOSTNAME'")' /home/pvpgn/pvpgn.yaml)
 
@@ -157,24 +163,7 @@ Setup_d2cs() {
     #     # echo "PORT: $port"
     #     name=$(echo "$realm" | yq e '.name' -)
     #     name=$(echo "$realm" | yq e '.name' -)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     # done
-
-
-
 
     # echo "Setup_d2dbs REALM_PATH: $REALM_PATH"
     # sed -i '/^realmname/c realmname               =       "'${REALM_NAME}'"' ${REALM_PATH}conf/d2cs.conf
@@ -211,16 +200,34 @@ Setup_d2dbs() {
     #     CONF_PATH=$1
     # fi
 
-    GSLIST=""
-    for d2gstmp in "${ARRD2GSS[@]}"; do
-        d2gstemp=$(echo $d2gstmp | yq e 'select(.[].d2dbsIP == "'$CCCC'") ')
-        if [ "$d2gstemp" != "" ]; then
-            D2GS_IP=$(echo $d2gstmp | yq e '.innerIP')
-            GSLIST="$GSLIST""$D2GS_IP"','
-        fi
+    for realm in "${ARRREALMS[@]}"; do
+        REALM_NAME=$(echo "$realm" | yq e '.name' -)
+        echo "name: $REALM_NAME"
+        # path=$(echo "$realm" | yq e '.path' -)
+        # echo "PORT: $path"
+        REALM_PATH=/home/pvpgn_$(echo "$realm" | yq e '.path' -)/
+        echo "Setup_d2cs REALM_PATH: $REALM_PATH"
+
+        D2CS_PORT=$(echo "$realm" | yq e '.port' -)
+        D2DBS_PORT=$(($D2CS_PORT + 1))
+
+        D2GS_IP=$(echo "$realm" | yq e '.d2gs[].innerIP')
+        echo $D2GS_IP
+        GSLIST=$(echo $D2GS_IP | tr -s ' ' ',')
+        sed -i '/^servaddrs/c servaddrs            =       0.0.0.0:'${D2DBS_PORT} ${REALM_PATH}conf/d2dbs.conf
+        sed -i '/^gameservlist/c gameservlist            =       '${GSLIST} ${REALM_PATH}conf/d2dbs.conf
     done
+
+    # GSLIST=""
+    # for d2gs in "${ARRD2GSS[@]}"; do
+    #     d2gstemp=$(echo $d2gs | yq e 'select(.d2dbsIP == "'$CCCC'") ')
+    #     if [ "$d2gstemp" != "" ]; then
+    #         D2DBS_IP=$(echo $d2gs | yq e '.innerIP')
+    #         GSLIST="$GSLIST""$D2DBS_IP"','
+    #     fi
+    # done
     
-    sed -i '/^gameservlist/c gameservlist            =       '${GSLIST} ${PVPGN_PATH}conf/d2dbs.conf
+    # sed -i '/^gameservlist/c gameservlist            =       '${GSLIST} ${PVPGN_PATH}conf/d2dbs.conf
 
 
     # D2GS_IP=$2
@@ -258,25 +265,34 @@ Setup_address_translation() {
         CID=$(echo "$realm" | yq e '.cid' -)
         echo "CID: $CID"
         D2CS_PORT=$(echo "$realm" | yq e '.port' -)
-        echo "PORT: $port"
+        echo "Setup_address_translation PORT: $D2CS_PORT"
         REALM_NAME=$(echo "$realm" | yq e '.name' -)
-        echo "PORT: $name"
+        REALM_PATH=/home/pvpgn_$(echo "$realm" | yq e '.path' -)/
+        echo "Setup_address_translation REALM_NAME: $REALM_NAME"
 
-
-        sed -i '/^'${D2CS_IP_input}:${D2CS_PORT}'/d' ${PVPGN_PATH}conf/address_translation.conf
+        # sed -i '/^\d.*:'${D2CS_PORT}'/d' ${PVPGN_PATH}conf/address_translation.conf
+        sed -i "/^[1-9]\+.*:${D2CS_PORT}/d" ${PVPGN_PATH}conf/address_translation.conf
         sed -i '/1.2.3.4:6113/a '${D2CS_IP_input}':'${D2CS_PORT}'   '${D2CS_IP_output}':'${D2CS_PORT}'          10.88.0.0/16         ANY' ${PVPGN_PATH}conf/address_translation.conf
+        sed -i "/^[1-9]\+.*:${D2CS_PORT}/d" ${REALM_PATH}conf/address_translation.conf
+        sed -i '/1.2.3.4:6113/a '${D2CS_IP_input}':'${D2CS_PORT}'   '${D2CS_IP_output}':'${D2CS_PORT}'          10.88.0.0/16         ANY' ${REALM_PATH}conf/address_translation.conf
     done
 
     for d2gs in "${ARRD2GSS[@]}"; do
-        # d2gstemp=$(echo $d2gs | yq e 'select(.[].d2dbsIP == "'$CCCC'") ')
+        # d2gstemp=$(echo $d2gs | yq e 'select(.cid == "'$HOSTNAME'") ')
         # if [ "$d2gstemp" != "" ]; then
-        #     D2GS_IP=$(echo $d2gs | yq e '.innerIP')
-        #     GSLIST="$GSLIST""$D2GS_IP"','
+            D2GS_IP_input=$(echo "$d2gs" | yq e '.innerIP' -)
+            D2GS_IP_output=$(echo "$d2gs" | yq e '.outIP' -)
         # fi
-        D2GS_IP_input=$(echo "$d2gs" | yq e '.innerIP' -)
-        D2GS_IP_output=$(echo "$d2gs" | yq e '.outIP' -)
-        sed -i '/^'${D2GS_IP_input}:4000'/d' ${PVPGN_PATH}conf/address_translation.conf
+
+        REALM_PATH=/home/pvpgn_$(echo "$d2gs" | yq e '.path' -)/
+
+        echo "Setup_address_translation  D2GS_IP_input: $D2GS_IP_input   D2GS_IP_output: $D2GS_IP_output"
+
+        # sed -i '/'${D2GS_IP_output}:4000'/d' ${PVPGN_PATH}conf/address_translation.conf
+        sed -i '/'${D2GS_IP_output}':4000/d' ${PVPGN_PATH}conf/address_translation.conf
         sed -i '/1.2.3.4:4000/a '${D2GS_IP_input}':4000   '${D2GS_IP_output}':4000          10.88.0.0/16         ANY' ${PVPGN_PATH}conf/address_translation.conf
+        sed -i '/'${D2GS_IP_output}':4000/d' ${REALM_PATH}conf/address_translation.conf
+        sed -i '/1.2.3.4:4000/a '${D2GS_IP_input}':4000   '${D2GS_IP_output}':4000          10.88.0.0/16         ANY' ${REALM_PATH}conf/address_translation.conf
     done
 
     # echo "Setup_address_translation PVPGN_PATH: $PVPGN_PATH"
@@ -293,56 +309,81 @@ Setup_d2gs() {
     # VERSION=$5
     # mkdir -p /home/d2gs
     # CONF_PATH=/home/d2gs
-    cd ${D2GS_PATH}    
-    # wget -q http://10.0.0.10/docker/d2gs/D2GS_Base.7z
-    # wget -q https://ia801809.us.archive.org/29/items/d2gs-base.-7z/D2GS_Base.7z
-    wget -q https://github.com/wqmeng/pvpgner/raw/main/d2gs/D2GS_${VERSION}.7z
+    D2GS_PATH=/home/d2gs/
+    echo "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    echo "Setup_d2gs   HOSTNAME:   $HOSTNAME"
+    for realm in "${ARRREALMS[@]}"; do
+        echo "realm: is =========================="
+        echo $realm
 
-    # create all files soft link in lnsrc to lntest .
-    # ln -s -t ./lntest ./lnsrc/*
-    # 7za x -y D2GS_Base.7z >/dev/null 2>&1
-    # mv D2GS_Base/* .
-    # rm D2GS_Base -rf
-    # rm D2GS_Base.7z -rf
-    7za x -y D2GS_${VERSION}.7z >/dev/null 2>&1
-    mv D2GS_${VERSION}/* .
-    rm D2GS_${VERSION} -rf
-    ln -s -t /home/d2gs/ /home/d2gs_base/*
-    touch d2_${VERSION}
+        d2gs=$(echo $realm | yq e '.d2gs[] | select(.cid == "'$HOSTNAME'") ')
 
-    D2CS_IP=$1
-    D2CS_PORT=$2
-    D2DBS_IP=$3
-    D2GS_PASSWD=$4
+        if [ "$d2gs" != "" ]; then
 
-    REMLM_NAME=$(yq e '.pvpgn.d2gs[] | select(.innerIP == "'$DDDD'") | .realm[].name ' /home/pvpgn/pvpgn.yaml)
+            echo "find a d2gs: "      
+            D2CS_IP=$(echo "$d2gs" | yq e '.d2csIP' -)
+            D2DBS_IP=$(echo "$d2gs" | yq e '.d2dbsIP' -)
+            D2GS_PASSWD=$(echo "$d2gs" | yq e '.AdminPwd' -)
 
-    sed -i '/^EnableWarden/c EnableWarden=0' ${D2GS_PATH}d2server.ini
-    sed -i '/^EnableEthSocketBugFix/c EnableEthSocketBugFix=0' ${D2GS_PATH}d2server.ini
-    sed -i '/^DisableBugMF/c DisableBugMF=0' ${D2GS_PATH}d2server.ini
+            VERSION=$(echo "$realm" | yq e '.version' -)
+            D2CS_PORT=$(echo "$realm" | yq e '.port' -)
+            echo "Setup_d2gs D2CS_PORT Realm PORT: $D2CS_PORT"
+            cd ${D2GS_PATH}    
+            # wget -q http://10.0.0.10/docker/d2gs/D2GS_Base.7z
+            # wget -q https://ia801809.us.archive.org/29/items/d2gs-base.-7z/D2GS_Base.7z
+            wget -q https://github.com/wqmeng/pvpgner/raw/main/d2gs/D2GS_${VERSION}.7z
 
-    sed -i '/^"D2CSIP"/c "D2CSIP"="'${D2CS_IP}'"' ${D2GS_PATH}d2gs.reg
+            # create all files soft link in lnsrc to lntest .
+            # ln -s -t ./lntest ./lnsrc/*
+            # 7za x -y D2GS_Base.7z >/dev/null 2>&1
+            # mv D2GS_Base/* .
+            # rm D2GS_Base -rf
+            # rm D2GS_Base.7z -rf
+            7za x -y D2GS_${VERSION}.7z >/dev/null 2>&1
+            mv D2GS_${VERSION}/* .
+            rm D2GS_${VERSION} -rf
+            ln -s -t /home/d2gs/ /home/d2gs_base/*
+            touch d2_${VERSION}
 
-    if [ "$D2CS_PORT" != "6113" ]; then
-        REALM_PORTX=$(echo "${D2CS_PORT}" | awk '{printf "%08x\n",$0}')
-    else
-        REALM_PORTX="000017e1"
-    fi
+            # D2CS_IP=$1
+            # D2CS_PORT=$2
+            # D2DBS_IP=$3
+            # D2GS_PASSWD=$4
 
-    sed -i '/^"D2CSPort"/c "D2CSPort"=dword:'${REALM_PORTX} ${D2GS_PATH}d2gs.reg
-    sed -i '/^"D2DBSIP"/c "D2DBSIP"="'${D2DBS_IP}'"' ${D2GS_PATH}d2gs.reg
-    # 4096 MaxGames
-    sed -i '/^"MaxGames"/c "MaxGames"=dword:00001000' ${D2GS_PATH}d2gs.reg
-    # telnet 8888 password: abcd123
-    sed -i '/^"AdminPassword"/c "AdminPassword"="9e75a42100e1b9e0b5d3873045084fae699adcb0"' ${D2GS_PATH}d2gs.reg
-    # [HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\D2Server\D2GS]  // 64bit Win
-    # [HKEY_LOCAL_MACHINE\SOFTWARE\D2Server\D2GS] // 32bit Win
-    \cp ${D2GS_PATH}d2gs.reg ${D2GS_PATH}d2gs_x64.reg
+            # REMLM_NAME=$(yq e '.pvpgn.d2gs[] | select(.innerIP == "'$DDDD'") | .realm[].name ' /home/pvpgn/pvpgn.yaml)
 
-    sed -i 's/Wow6432Node\\//' ${D2GS_PATH}d2gs.reg
-    #cat ${D2GS_PATH}d2gs.reg
-    cd ${D2GS_PATH}
-    wine regedit ${D2GS_PATH}d2gs.reg
+            sed -i '/^EnableWarden/c EnableWarden=0' ${D2GS_PATH}d2server.ini
+            sed -i '/^EnableEthSocketBugFix/c EnableEthSocketBugFix=0' ${D2GS_PATH}d2server.ini
+            sed -i '/^DisableBugMF/c DisableBugMF=0' ${D2GS_PATH}d2server.ini
+
+            sed -i '/^"D2CSIP"/c "D2CSIP"="'${D2CS_IP}'"' ${D2GS_PATH}d2gs.reg
+
+            if [ "$D2CS_PORT" != "6113" ]; then
+                REALM_DSPORTX=$(echo "${D2CS_PORT}" | awk '{printf "%08x\n",$0}')
+                REALM_DBSPORTX=$(echo "$((${D2CS_PORT} + 1))" | awk '{printf "%08x\n",$0}')
+            else
+                REALM_DSPORTX="000017e1"
+                REALM_DBSPORTX="000017e2"
+            fi
+
+            sed -i '/^"D2CSPort"/c "D2CSPort"=dword:'${REALM_DSPORTX} ${D2GS_PATH}d2gs.reg
+            sed -i '/^"D2DBSIP"/c "D2DBSIP"="'${D2DBS_IP}'"' ${D2GS_PATH}d2gs.reg
+            sed -i '/^"D2DBSPort"/c "D2DBSPort"=dword:'${REALM_DBSPORTX} ${D2GS_PATH}d2gs.reg
+
+            # 4096 MaxGames
+            sed -i '/^"MaxGames"/c "MaxGames"=dword:00001000' ${D2GS_PATH}d2gs.reg
+            # telnet 8888 password: abcd123
+            sed -i '/^"AdminPassword"/c "AdminPassword"="'$D2GS_PASSWD'"' ${D2GS_PATH}d2gs.reg
+            # [HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\D2Server\D2GS]  // 64bit Win
+            # [HKEY_LOCAL_MACHINE\SOFTWARE\D2Server\D2GS] // 32bit Win
+            \cp ${D2GS_PATH}d2gs.reg ${D2GS_PATH}d2gs_x64.reg
+
+            sed -i 's/Wow6432Node\\//' ${D2GS_PATH}d2gs.reg
+            #cat ${D2GS_PATH}d2gs.reg
+            cd ${D2GS_PATH}
+            wine regedit ${D2GS_PATH}d2gs.reg
+        fi
+    done
 }
 
 Setup_Pvpgn() {
@@ -389,14 +430,14 @@ Start_Pvpgn() {
     #     CONF_PATH=$1
     # fi
 
-    Update_InnerIP
+    # Update_InnerIP
 
     pkill -f 'PvPGNConsole'
 
     cd ${PVPGN_PATH}
     echo "Start_Pvpgn PVPGN_PATH: $PVPGN_PATH"
     # wine PvPGNConsole.exe >& /dev/null &
-    nohup bash -c "wine PvPGNConsole.exe &" </dev/null &>/dev/null &
+    nohup bash -c "wine ${PVPGN_PATH}PvPGNConsole.exe &" </dev/null &>/dev/null &
     sleep 1
 }
 
@@ -406,12 +447,25 @@ Start_d2cs() {
     # else
     #     CONF_PATH=$1
     # fi
-    echo "Start_d2cs REALM_PATH: $REALM_PATH"
-    pkill -f $REALM_PATH'/D2CSConsole'
-    cd ${REALM_PATH}
-    # wine D2CSConsole.exe >& /dev/null &
-    nohup bash -c "wine $REALM_PATH/D2CSConsole.exe &" </dev/null &>/dev/null &
-    sleep 1
+
+    for realm in "${ARRREALMS[@]}"; do
+        # identity mapping is a yaml snippet representing a single entry
+        CID=$(echo "$realm" | yq e '.cid' -)
+        echo "Start_d2cs CID: $CID"
+        # D2CS_PATH=$(echo "$realm" | yq e '.path' -)
+        REALM_PATH=/home/pvpgn_$(echo "$realm" | yq e '.path' -)'/'
+        # echo "Start_d2cs Realm PORT: $REALM_PATH"
+        # REALM_NAME=$(echo "$realm" | yq e '.name' -)
+        # echo "PORT: $name"
+
+        echo "Start_d2cs REALM_PATH: $REALM_PATH"
+        pkill -f $REALM_PATH'D2CSConsole'
+        cd ${REALM_PATH}
+        # wine D2CSConsole.exe >& /dev/null &
+        nohup bash -c "wine ${REALM_PATH}D2CSConsole.exe &" </dev/null &>/dev/null &
+        sleep 1
+
+    done
 }
 
 Start_d2dbs() {
@@ -420,12 +474,31 @@ Start_d2dbs() {
     # else
     #     CONF_PATH=$1
     # fi
-    pkill -f 'D2DBSConsole'
-    echo "Start_d2dbs PVPGN_PATH: $PVPGN_PATH"
-    cd ${PVPGN_PATH}
-    # wine D2DBSConsole.exe >& /dev/null &
-    nohup bash -c "wine D2DBSConsole.exe &" </dev/null &>/dev/null &
-    sleep 1
+    # pkill -f 'D2DBSConsole'
+
+    for realm in "${ARRREALMS[@]}"; do
+        # identity mapping is a yaml snippet representing a single entry
+        CID=$(echo "$realm" | yq e '.cid' -)
+        echo "Start_d2dbs CID: $CID"
+        # D2CS_PATH=$(echo "$realm" | yq e '.path' -)
+        REALM_PATH=/home/pvpgn_$(echo "$realm" | yq e '.path' -)'/'
+        # echo "Start_d2dbs Realm PORT: $REALM_PATH"
+        # REALM_NAME=$(echo "$realm" | yq e '.name' -)
+        # echo "PORT: $name"
+
+        echo "Start_d2dbs REALM_PATH: $REALM_PATH"
+        pkill -f $REALM_PATH'D2DBSConsole'
+        cd ${REALM_PATH}
+        # wine D2CSConsole.exe >& /dev/null &
+        nohup bash -c "wine ${REALM_PATH}D2DBSConsole.exe &" </dev/null &>/dev/null &
+        sleep 1
+    done
+
+    # echo "Start_d2dbs PVPGN_PATH: $PVPGN_PATH"
+    # cd ${PVPGN_PATH}
+    # # wine D2DBSConsole.exe >& /dev/null &
+    # nohup bash -c "wine D2DBSConsole.exe &" </dev/null &>/dev/null &
+    # sleep 1
 }
 
 Start_d2gs() {
@@ -521,6 +594,11 @@ Check_DB()
     fi
 }
 
+
+# wget -q https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+# chmod +x /usr/bin/yq
+# ln -s /usr/bin/yq /usr/local/bin/yq
+
 ReadYaml
 
 cd /home/pvpgn
@@ -557,9 +635,6 @@ D2DBS_PORT=6114     # d2cs  binding at 6113 different version of d2 could use di
 DDDD=${IP}          # d2gs  binding at 4000, this port can not change.
 # VERSION=$6
 
-wget -q https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
-chmod +x /usr/bin/yq
-# ln -s /usr/bin/yq /usr/local/bin/yq
 # REALM_PATH=/home/pvpgn_$(yq e '.pvpgn.realms[] | select(.cid == "'$HOSTNAME'").path' /home/pvpgn/pvpgn.yaml)
 # PVPGN_PATH=/home/pvpgn_$(yq e '.pvpgn.path' /home/pvpgn/pvpgn.yaml)/
 # REALM_PATH=/home/pvpgn_$(yq e '.pvpgn.realms[] | select(.name == "'$REALM_NAME'").path' /home/pvpgn/pvpgn.yaml)/
@@ -732,6 +807,11 @@ case "${ACT}" in
                 EXTIP=$3
                 Setup_address_translation '/home/pvpgn' ${BBBB} ${EXTIP} ${D2CS_PORT} ${DDDD} ${EXTIP}
                 # Setup_address_translation '/home/pvpgn' ${BBBB} ${EXTIP} ${D2CS_PORT} ${DDDD} ${EXTIP}
+            ;;
+            d2gs)
+                DDDD=$3
+                echo "Act setup, Task d2gs oooooooooooooooooooooooooooo "
+                Setup_d2gs '/home/pvpgn'_$REALM_NAME $REALM_NAME ${DDDD} ${D2CS_PORT} ${AAAA}
             ;;
             # d2cs)
             #     Setup_D2cs

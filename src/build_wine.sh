@@ -12,10 +12,6 @@ dnf -yq install wget tmux gcc libX11-devel freetype-devel zlib-devel libxcb-deve
 dnf -yq groupinstall 'Development Tools'
 dnf -yq install --assumeyes epel-release
 dnf -yq install --assumeyes p7zip
-dnf -yq install jq
-wget -q https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
-chmod +x /usr/bin/yq
-
 mkdir -p /home/src
 cd /home/src
 
@@ -42,6 +38,10 @@ make install
 wine --version
 
 WINEPREFIX=~/.wine WINEARCH="win32" wine winecfg
+
+wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+chmod +x /usr/bin/yq
+dnf -yq install jq
 
 # 后面添加具体的服务器的版本文件.
 # wget -qO diablo2_bnet.7z "http://10.0.0.10/diablo2_bnet.7z"
