@@ -38,7 +38,6 @@ Setup_realm() {
 Setup_d2cs() {
     for realm in "${ARRREALMS[@]}"; do
         D2CS_PORT=$(echo "$realm" | yq e '.port' -)
-        # D2DBS_PORT=$(($D2CS_PORT + 1))
         REALM_NAME=$(echo "$realm" | yq e '.name' -)
         REALM_PATH=/home/pvpgn_$(echo "$realm" | yq e '.path' -)/
         D2GS_IP=$(echo "$realm" | yq e '.d2gs[].innerIP')
@@ -70,7 +69,7 @@ Setup_address_translation() {
         REALM_NAME=$(echo "$realm" | yq e '.name' -)
         REALM_PATH=/home/pvpgn_$(echo "$realm" | yq e '.path' -)/
         sed -i "/^[1-9]\+.*:${D2CS_PORT}/d" ${PVPGN_PATH}conf/address_translation.conf
-        sed -i '/1.2.3.4:6113/a '${D2CS_IP_input}':'${D2CS_PORT}'   '${D2CS_IP_output}':'${D2CS_PORT}'          10.88.0.0/16         ANY' ${PVPGN_PATH}conf/address_translation.conf
+sed -i '/1.2.3.4:6113/a '${D2CS_IP_input}':'${D2CS_PORT}'   '${D2CS_IP_output}':'${D2CS_PORT}'          10.88.0.0/16         ANY' ${PVPGN_PATH}conf/address_translation.conf
         sed -i "/^[1-9]\+.*:${D2CS_PORT}/d" ${REALM_PATH}conf/address_translation.conf
         sed -i '/1.2.3.4:6113/a '${D2CS_IP_input}':'${D2CS_PORT}'   '${D2CS_IP_output}':'${D2CS_PORT}'          10.88.0.0/16         ANY' ${REALM_PATH}conf/address_translation.conf
         readarray ARR_D2GSS < <(echo "$realm" | yq e -o=j -I=0 '.d2gs[]' -)
@@ -96,16 +95,16 @@ Setup_d2gs() {
                 D2CS_IP=$(echo "$d2gs" | yq e '.d2csIP' -)
                 D2DBS_IP=$(echo "$d2gs" | yq e '.d2dbsIP' -)
                 D2GS_PASSWD=$(echo "$d2gs" | yq e '.AdminPwd' -)
-                VERSION=$(echo "$realm" | yq e '.version' -)
+                D2VERSION=$(echo "$realm" | yq e '.version' -)
                 D2CS_PORT=$(echo "$realm" | yq e '.port' -)
-                cd ${D2GS_PATH}    
-                wget -q https://github.com/wqmeng/pvpgner/raw/main/d2gs/D2GS_${VERSION}.7z
+                cd ${D2GS_PATH}
+                wget -q https://github.com/wqmeng/pvpgner/raw/main/d2gs/D2GS_${D2VERSION}.7z
 
-                7za x -y D2GS_${VERSION}.7z >/dev/null 2>&1
-                mv D2GS_${VERSION}/* .
-                rm D2GS_${VERSION} -rf
+                7za x -y D2GS_${D2VERSION}.7z >/dev/null 2>&1
+                mv D2GS_${D2VERSION}/* .
+                rm D2GS_${D2VERSION} -rf
                 ln -s -t /home/d2gs/ /home/D2GS_BASE/* >/dev/null 2>&1
-                touch d2_${VERSION}
+                touch d2_${D2VERSION}
 
                 sed -i '/^EnableWarden/c EnableWarden=0' ${D2GS_PATH}d2server.ini
                 sed -i '/^EnableEthSocketBugFix/c EnableEthSocketBugFix=0' ${D2GS_PATH}d2server.ini
@@ -134,48 +133,6 @@ Setup_d2gs() {
                 wine regedit ${D2GS_PATH}d2gs.reg
             fi
         done
-        # d2gs=$(echo $realm | yq e '.d2gs[] | select(.cid == "'$HOSTNAME'") ')
-        # if [ "$d2gs" != "" ]; then
-        #     D2CS_IP=$(echo "$d2gs" | yq e '.d2csIP' -)
-        #     D2DBS_IP=$(echo "$d2gs" | yq e '.d2dbsIP' -)
-        #     D2GS_PASSWD=$(echo "$d2gs" | yq e '.AdminPwd' -)
-        #     VERSION=$(echo "$realm" | yq e '.version' -)
-        #     D2CS_PORT=$(echo "$realm" | yq e '.port' -)
-        #     cd ${D2GS_PATH}    
-        #     wget -q https://github.com/wqmeng/pvpgner/raw/main/d2gs/D2GS_${VERSION}.7z
-
-        #     7za x -y D2GS_${VERSION}.7z >/dev/null 2>&1
-        #     mv D2GS_${VERSION}/* .
-        #     rm D2GS_${VERSION} -rf
-        #     ln -s -t /home/d2gs/ /home/D2GS_BASE/*
-        #     touch d2_${VERSION}
-
-        #     sed -i '/^EnableWarden/c EnableWarden=0' ${D2GS_PATH}d2server.ini
-        #     sed -i '/^EnableEthSocketBugFix/c EnableEthSocketBugFix=0' ${D2GS_PATH}d2server.ini
-        #     sed -i '/^DisableBugMF/c DisableBugMF=0' ${D2GS_PATH}d2server.ini
-        #     sed -i '/^"D2CSIP"/c "D2CSIP"="'${D2CS_IP}'"' ${D2GS_PATH}d2gs.reg
-
-        #     if [ "$D2CS_PORT" != "6113" ]; then
-        #         REALM_DSPORTX=$(echo "${D2CS_PORT}" | awk '{printf "%08x\n",$0}')
-        #         REALM_DBSPORTX=$(echo "$((${D2CS_PORT} + 1))" | awk '{printf "%08x\n",$0}')
-        #     else
-        #         REALM_DSPORTX="000017e1"
-        #         REALM_DBSPORTX="000017e2"
-        #     fi
-
-        #     sed -i '/^"D2CSPort"/c "D2CSPort"=dword:'${REALM_DSPORTX} ${D2GS_PATH}d2gs.reg
-        #     sed -i '/^"D2DBSIP"/c "D2DBSIP"="'${D2DBS_IP}'"' ${D2GS_PATH}d2gs.reg
-        #     sed -i '/^"D2DBSPort"/c "D2DBSPort"=dword:'${REALM_DBSPORTX} ${D2GS_PATH}d2gs.reg
-        #     # 4096 MaxGames
-        #     sed -i '/^"MaxGames"/c "MaxGames"=dword:00001000' ${D2GS_PATH}d2gs.reg
-        #     # telnet 8888 password: abcd123
-        #     sed -i '/^"AdminPassword"/c "AdminPassword"="'$D2GS_PASSWD'"' ${D2GS_PATH}d2gs.reg
-        #     # [HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\D2Server\D2GS]  // 64bit Win
-        #     # [HKEY_LOCAL_MACHINE\SOFTWARE\D2Server\D2GS] // 32bit Win
-        #     \cp ${D2GS_PATH}d2gs.reg ${D2GS_PATH}d2gs_x64.reg
-        #     sed -i 's/Wow6432Node\\//' ${D2GS_PATH}d2gs.reg
-        #     wine regedit ${D2GS_PATH}d2gs.reg
-        # fi
     done
 }
 
@@ -325,16 +282,30 @@ case "${ACT}" in
         pkill -f 'D2DBSConsole'
         pkill -f 'D2GS'
         ;;
-    realm)
-        Add_realm
-        ;;
-    d2gs)
-        Add_d2gs
-        ;;
     delete)
-        Echo_Red "$0 pvpgn plain realm_name 1.13c"
-        Echo_Red "$0 realm realm_name 1.11b"
-        Echo_Red "$0 d2gs exist_realm # will detect a new output IP for new d2gs"
+        echo "$0 delete pvpgn path"
+        echo "$0 delete realm path"
+        echo "$0 delete d2gs path"
+        ;;
+    help)
+        echo "$0 setup pvpgn"
+        echo "$0 setup d2cs"
+        echo "$0 setup d2dbs"
+        echo "$0 setup address_translation"
+        echo "$0 setup Setup_d2gs"
+
+        echo "$0 start/restart pvpgn"
+        echo "$0 start/restart d2cs"
+        echo "$0 start/restart d2dbs"
+        echo "$0 start/restart d2gs"
+        
+        echo "$0 stop"
+
+        echo "$0 delete pvpgn path"
+        echo "$0 delete realm path"
+        echo "$0 delete d2gs path"
+
+        echo "$0 setup d2gs exist_realm # will detect a new output IP for new d2gs"
         ;;
     *)
         echo "Not supported action"

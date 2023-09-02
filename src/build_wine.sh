@@ -1,8 +1,8 @@
 #!/bin/sh
 if  [ "$1" == "" ]; then
-  VERSION=1.13c
+  D2VERSION=1.13c
 else
-  VERSION=$1
+  D2VERSION=$1
 fi
 
 dnf -yq clean all
