@@ -449,7 +449,7 @@ Print_Sucess_Info() {
     echo "|  Add realm: pvpgn realm add                                            |"
     echo "|  Add d2gs: pvpgn d2gs add                                              |"
     echo "+------------------------------------------------------------------------+"
-    echo "|  Default directory: /home/pvpgn                                        |"
+    echo "|  Default config file: /home/pvpgn/pvpgn.yaml                           |"
     echo "+------------------------------------------------------------------------+"
     echo "|  MySQL/MariaDB root password: ${DB_Root_Password}                      |"
     echo "+------------------------------------------------------------------------+"
