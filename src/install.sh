@@ -294,6 +294,7 @@ Dispaly_Selection() {
         #which D2 Version do you want to install?
         D2Select="2"
         Echo_Yellow "You have 4 options for your Diablo2 GS install."
+        echo "0: Install Diablo2 1.13d_VIP"
         echo "1: Install Diablo2 1.13d"
         echo "2: Install Diablo2 1.13c (default)"
         echo "3: Install Diablo2 1.11b"
@@ -303,6 +304,10 @@ Dispaly_Selection() {
         read -p "Enter your choice (1, 2, 3 or 4): " D2Select
 
         case "${D2Select}" in
+        0)
+            echo "You will install Diablo2 GS 1.13d"
+            D2Select=1.13d_VIP
+            ;;
         1)
             echo "You will install Diablo2 GS 1.13d"
             D2Select=1.13d
