@@ -24,10 +24,21 @@ Setup_realm() {
         REALM_NAME=$(echo "$realm" | yq e '.name' -)
         REALM_DES=$(echo "$realm" | yq e '.desc' -)
         REALM_PATH=/home/pvpgn_$(echo "$realm" | yq e '.path' -)/
+        D2VERSION=$(echo "$realm" | yq e '.version' -)
         cd /home
-        wget -q -t3 https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/pvpgn1.99.8.0.0-rc1-PRO.7z
-        7za x -y pvpgn1.99.8.0.0-rc1-PRO.7z >/dev/null 2>&1
-        mv -n /home/pvpgn1.99.8.0.0-rc1-PRO/* $REALM_PATH/
+        if [ "$D2VERSION" = "1.13d_VIP" ]; then
+            wget -q -t3 https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/pvpgn1.99.8.0.0-rc1-PRO_VIP.7z
+            7za x -y pvpgn1.99.8.0.0-rc1-PRO_VIP.7z >/dev/null 2>&1
+            mv -n /home/pvpgn1.99.8.0.0-rc1-PRO_VIP/* $REALM_PATH/
+            mv -n /home/pvpgn1.99.8.0.0-rc1-PRO_VIP/conf/* $REALM_PATH/conf/
+            mv -n /home/pvpgn1.99.8.0.0-rc1-PRO_VIP/var/* $REALM_PATH/var/
+        else
+            wget -q -t3 https://raw.githubusercontent.com/wqmeng/pvpgner/main/pvpgn/pvpgn1.99.8.0.0-rc1-PRO.7z
+            7za x -y pvpgn1.99.8.0.0-rc1-PRO.7z >/dev/null 2>&1
+            mv -n /home/pvpgn1.99.8.0.0-rc1-PRO/* $REALM_PATH/
+            mv -n /home/pvpgn1.99.8.0.0-rc1-PRO/conf/* $REALM_PATH/conf/
+            mv -n /home/pvpgn1.99.8.0.0-rc1-PRO/var/* $REALM_PATH/var/
+        fi
         rm pvpgn1.99.8.0.0-rc1-PRO* -rf
 
         sed -i '/^"'${REALM_NAME}'"/d' ${PVPGN_PATH}conf/realm.conf
@@ -42,10 +53,18 @@ Setup_d2cs() {
         REALM_PATH=/home/pvpgn_$(echo "$realm" | yq e '.path' -)/
         D2GS_IP=$(echo "$realm" | yq e '.d2gs[].innerIP')
         GSLIST=$(echo $D2GS_IP | tr -s ' ' ',')
-        sed -i '/^realmname/c realmname               =       "'${REALM_NAME}'"' ${REALM_PATH}conf/d2cs.conf
-        sed -i '/^servaddrs/c servaddrs            =       0.0.0.0:'${D2CS_PORT} ${REALM_PATH}conf/d2cs.conf
-        sed -i '/^bnetdaddr/c bnetdaddr               =       '${BNETD_IP}':6112' ${REALM_PATH}conf/d2cs.conf
-        sed -i '/^gameservlist/c gameservlist            =       '${GSLIST} ${REALM_PATH}conf/d2cs.conf
+        D2VERSION=$(echo "$realm" | yq e '.version' -)
+        if [ "$D2VERSION" = "1.13d_VIP" ]; then
+            sed -i '/^realmname/c realmname               =       "'${REALM_NAME}'"' ${REALM_PATH}conf/d2cs_VIP.conf
+            sed -i '/^servaddrs/c servaddrs            =       0.0.0.0:'${D2CS_PORT} ${REALM_PATH}conf/d2cs_VIP.conf
+            sed -i '/^bnetdaddr/c bnetdaddr               =       '${BNETD_IP}':6112' ${REALM_PATH}conf/d2cs_VIP.conf
+            sed -i '/^gameservlist/c gameservlist            =       '${GSLIST} ${REALM_PATH}conf/d2cs_VIP.conf
+        else
+            sed -i '/^realmname/c realmname               =       "'${REALM_NAME}'"' ${REALM_PATH}conf/d2cs.conf
+            sed -i '/^servaddrs/c servaddrs            =       0.0.0.0:'${D2CS_PORT} ${REALM_PATH}conf/d2cs.conf
+            sed -i '/^bnetdaddr/c bnetdaddr               =       '${BNETD_IP}':6112' ${REALM_PATH}conf/d2cs.conf
+            sed -i '/^gameservlist/c gameservlist            =       '${GSLIST} ${REALM_PATH}conf/d2cs.conf
+        fi
     done
 }
 
@@ -69,7 +88,7 @@ Setup_address_translation() {
         REALM_NAME=$(echo "$realm" | yq e '.name' -)
         REALM_PATH=/home/pvpgn_$(echo "$realm" | yq e '.path' -)/
         sed -i "/^[1-9]\+.*:${D2CS_PORT}/d" ${PVPGN_PATH}conf/address_translation.conf
-sed -i '/1.2.3.4:6113/a '${D2CS_IP_input}':'${D2CS_PORT}'   '${D2CS_IP_output}':'${D2CS_PORT}'          10.88.0.0/16         ANY' ${PVPGN_PATH}conf/address_translation.conf
+        sed -i '/1.2.3.4:6113/a '${D2CS_IP_input}':'${D2CS_PORT}'   '${D2CS_IP_output}':'${D2CS_PORT}'          10.88.0.0/16         ANY' ${PVPGN_PATH}conf/address_translation.conf
         sed -i "/^[1-9]\+.*:${D2CS_PORT}/d" ${REALM_PATH}conf/address_translation.conf
         sed -i '/1.2.3.4:6113/a '${D2CS_IP_input}':'${D2CS_PORT}'   '${D2CS_IP_output}':'${D2CS_PORT}'          10.88.0.0/16         ANY' ${REALM_PATH}conf/address_translation.conf
         readarray ARR_D2GSS < <(echo "$realm" | yq e -o=j -I=0 '.d2gs[]' -)
@@ -137,8 +156,8 @@ Setup_d2gs() {
 }
 
 Setup_Pvpgn() {
-    Setup_bnetd
     Setup_realm
+    Setup_bnetd
     Setup_d2cs
     Setup_d2dbs
     Setup_address_translation
@@ -155,9 +174,14 @@ Start_Pvpgn() {
 Start_d2cs() {
     for realm in "${ARRREALMS[@]}"; do
         REALM_PATH=/home/pvpgn_$(echo "$realm" | yq e '.path' -)'/'
-        pkill -f $REALM_PATH'D2CSConsole'
+        pkill -if $REALM_PATH'D2CSConsole'
         cd ${REALM_PATH}
-        nohup bash -c "wine ${REALM_PATH}D2CSConsole.exe &" </dev/null &>/dev/null &
+        D2VERSION=$(echo "$realm" | yq e '.version' -)
+        if [ "$D2VERSION" = "1.13d_VIP" ]; then
+            nohup bash -c "wine ${REALM_PATH}d2csConsole_VIP.exe &" </dev/null &>/dev/null &
+        else
+            nohup bash -c "wine ${REALM_PATH}D2CSConsole.exe &" </dev/null &>/dev/null &
+        fi
         sleep 1
     done
 }
@@ -177,19 +201,6 @@ Start_d2gs() {
     cd ${D2GS_PATH}
     nohup bash -c "wine D2GS.exe &" </dev/null &>/dev/null &
     sleep 3
-}
-
-Add_realm() {
-    Setup_realm
-    Setup_address_translation
-    Start_Pvpgn
-    Start_d2cs
-    Start_d2dbs
-    Start_d2gs
-}
-
-Add_d2gs() {
-    Setup_d2gs
 }
 
 Check_DB()

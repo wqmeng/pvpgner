@@ -250,7 +250,7 @@ Dispaly_Selection() {
 
     if [[ "${ACTSelect}" = "1" || "${ACTSelect}" = "2" ]]; then
         #set realm name and port
-        REALM_NAME="Realm_D2Version"
+        REALM_NAME="Rm_D2Version"
 
         Echo_Yellow "Please setup Realm name, default is: "$REALM_NAME
         read -p "Please enter: " READ_REALM_NAME
@@ -305,7 +305,7 @@ Dispaly_Selection() {
 
         case "${D2Select}" in
         0)
-            echo "You will install Diablo2 GS 1.13d"
+            echo "You will install Diablo2 GS 1.13d_VIP"
             D2Select=1.13d_VIP
             ;;
         1)
@@ -330,8 +330,8 @@ Dispaly_Selection() {
             ;;
         esac
 
-        if [[ "${REALM_NAME}" = "Realm_D2Version" || "${REALM_NAME}" = "Realm" ]]; then
-            REALM_NAME="Realm_"${D2Select}
+        if [[ "${REALM_NAME}" = "Rm_D2Version" || "${REALM_NAME}" = "Realm" ]]; then
+            REALM_NAME="Rm_"${D2Select}
         fi
     fi
 
@@ -569,15 +569,9 @@ pvpgn)
     fi
 
     STRDATE=$(date +%y%m%d_%H%M%S)
-    mkdir /home/pvpgn_$STRDATE
-    mkdir /home/d2gs_$STRDATE
-
-    cd /home
-    wget -q https://github.com/wqmeng/pvpgner/raw/main/pvpgn/pvpgn1.99.8.0.0-rc1-PRO.7z
-    7za x -y pvpgn1.99.8.0.0-rc1-PRO.7z >/dev/null 2>&1
-    \cp -rn /home/pvpgn1.99.8.0.0-rc1-PRO/var /home/pvpgn_$STRDATE
-    \cp -rn /home/pvpgn1.99.8.0.0-rc1-PRO/conf /home/pvpgn_$STRDATE
-    rm pvpgn1.99.8.0.0-rc1-PRO* -rf
+    mkdir -p /home/pvpgn_$STRDATE/var
+    mkdir -p /home/pvpgn_$STRDATE/conf
+    mkdir -p /home/d2gs_$STRDATE
 
     docker run -dt --privileged=true -v /home/pvpgn_$STRDATE/conf:/home/pvpgn_$STRDATE/conf -v /home/pvpgn_$STRDATE/var:/home/pvpgn_$STRDATE/var -v /home/d2gs_$STRDATE:/home/d2gs -v /home/pvpgn:/home/pvpgn -v /home/D2GS_BASE:/home/D2GS_BASE --name pvpgn -p $EXTIP:6112:6112 -p $EXTIP:6112:6112/udp -p $EXTIP:$REALM_PORT:$REALM_PORT -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
     # update config_pvpgn.sh
@@ -641,15 +635,9 @@ realm)
         docker rm -fi $CID >/dev/null 2>&1
     fi
     STRDATE=$(date +%y%m%d_%H%M%S)
-    mkdir /home/pvpgn_$STRDATE
-    mkdir /home/d2gs_$STRDATE
-
-    cd /home
-    wget -q https://github.com/wqmeng/pvpgner/raw/main/pvpgn/pvpgn1.99.8.0.0-rc1-PRO.7z
-    7za x -y pvpgn1.99.8.0.0-rc1-PRO.7z >/dev/null 2>&1
-    \cp -rn /home/pvpgn1.99.8.0.0-rc1-PRO/var /home/pvpgn_$STRDATE
-    \cp -rn /home/pvpgn1.99.8.0.0-rc1-PRO/conf /home/pvpgn_$STRDATE
-    rm pvpgn1.99.8.0.0-rc1-PRO* -rf
+    mkdir -p /home/pvpgn_$STRDATE/var
+    mkdir -p /home/pvpgn_$STRDATE/conf
+    mkdir -p /home/d2gs_$STRDATE
 
     docker run -dt --privileged=true $V_PATHS -v /home/pvpgn_$STRDATE/conf:/home/pvpgn_$STRDATE/conf -v /home/pvpgn_$STRDATE/var:/home/pvpgn_$STRDATE/var -v /home/pvpgn:/home/pvpgn -v /home/d2gs_$PVPBN_PATH:/home/d2gs -v /home/D2GS_BASE:/home/D2GS_BASE --name pvpgn -p $EXTIP:6112:6112 -p $EXTIP:6112:6112/udp $P_PORTS -p $EXTIP:$REALM_PORT:$REALM_PORT -p $EXTIP:4000:4000 wqmeng:pvpgn /bin/bash
     docker exec -it pvpgn rm -rf /home/pvpgn/config_pvpgn.sh
